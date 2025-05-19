@@ -103,7 +103,7 @@ export default function LoginPage() {
                   </form>
                   <div className="mt-6 text-center">
                     <p className="text-gray-600">
-                      Don't have an account?{" "}
+                      Don&apos;t have an account?{" "}
                       <Link href="/signup" className="text-black font-medium">
                         Sign up
                       </Link>
@@ -131,7 +131,7 @@ export default function LoginPage() {
 
                   <div className="mt-6 text-center">
                     <p className="text-gray-600">
-                      Don't have an account?{" "}
+                      Don&apos;t have an account?{" "}
                       <Link href="/signup" className="text-black font-medium">
                         Sign up
                       </Link>
@@ -142,7 +142,7 @@ export default function LoginPage() {
 
               <div className="mt-8 text-center text-sm text-gray-500">
                 <p>
-                  This site is protected by Google reCAPTCHA to ensure you're
+                  This site is protected by Google reCAPTCHA to ensure you&apos;re
                   not a bot.{" "}
                   <a href="#" className="text-black underline">
                     Learn more
