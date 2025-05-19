@@ -41,7 +41,7 @@ const faqData = [
   {
     question: "Is OKX licensed and regulated in the US?",
     answer:
-      "OKX operates with various licenses and regulatory approvals in different jurisdictions. For the most up-to-date information about OKX's regulatory status in the US, please visit our regulatory compliance page.",
+      "OKX operates with various licenses and regulatory approvals in different jurisdictions. For the most up-to-date information about OKX&rsquo;s regulatory status in the US, please visit our regulatory compliance page.",
   },
   {
     question: "Can I use my bank account to fund and withdraw?",
