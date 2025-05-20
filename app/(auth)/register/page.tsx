@@ -99,7 +99,7 @@ export default function RegisterPageUI() {
                 </div>
 
                 <Button className="cursor-pointer w-full bg-primary text-white hover:shadow-lg dark:bg-primary-dark py-3 rounded-md">
-                  Register
+                  Sign up
                 </Button>
               </form>
 
