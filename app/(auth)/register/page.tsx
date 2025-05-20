@@ -105,7 +105,7 @@ export default function RegisterPageUI() {
 
               <div className="mt-8 text-center text-sm text-gray-500">
                 <p>
-                  This site is protected by Google reCAPTCHA to ensure you're not a bot.{" "}
+                  This site is protected by Google reCAPTCHA to ensure you&apos;re not a bot.{" "}
                   <a href="#" className="text-black underline">
                     Learn more
                   </a>
