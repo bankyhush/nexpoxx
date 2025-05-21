@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import React from "react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Logo } from "@/components/logo";
@@ -67,11 +66,7 @@ export const DashboardHeader = () => {
 
             <div className="flex items-center space-x-3">
             <div className="hidden md:flex items-center space-x-3 text-white">
-              <button className="flex items-center space-x-1 bg-zinc-800 rounded-full px-3 py-1.5">
-                <div className="w-6 h-6 bg-zinc-700 rounded-full"></div>
-                <span className="text-sm">Coolaker</span>
-                <ChevronDown className="h-4 w-4" />
-              </button>
+              
               
               <button className="p-2 bg-zinc-800 rounded-full">
                 <Plus className="h-4 w-4" />
@@ -106,16 +101,11 @@ export const DashboardHeader = () => {
                 </ul>
               </div>
               <div className="flex justify-center items-center w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-                <Button asChild variant="outline" size="sm">
-                  <Link href="/login">
-                    <span>Login</span>
-                  </Link>
-                </Button>
-                <Button asChild size="sm">
-                  <Link href="/register">
-                    <span>Sign Up</span>
-                  </Link>
-                </Button>
+              <button className="text-white flex items-center space-x-1 bg-zinc-800 rounded-full px-3 py-1.5">
+                <div className="w-6 h-6 bg-zinc-700 rounded-full"></div>
+                <span className="text-sm">Coolaker</span>
+                <ChevronDown className="h-4 w-4" />
+              </button>
                 <ModeToggle />
               </div>
             </div>
