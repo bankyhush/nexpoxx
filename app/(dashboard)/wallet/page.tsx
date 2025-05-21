@@ -1,16 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import {
-  Search,
-  ChevronDown,
-  User,
-  LogOut,
-  Bell,
-  Globe,
-  Eye,
-  MessageSquare,
-  ChevronRight,
-} from "lucide-react";
+import { Search, ChevronDown, Bell, Eye, ChevronRight } from "lucide-react";
 
 const WalletDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -85,30 +75,9 @@ const WalletDashboard = () => {
     { name: "PoR reports", active: false },
   ];
 
-  const footerSections = [
-    {
-      title: "More about OKX",
-      links: ["About us", "Careers", "Contact us", "Terms of service"],
-    },
-    {
-      title: "Products",
-      links: ["Buy crypto", "P2P trading", "Convert", "Trade"],
-    },
-    {
-      title: "Services",
-      links: ["Affiliate", "API", "Historical market data"],
-    },
-    {
-      title: "Trade",
-      links: ["BTC USDC", "ETH USDC", "BTC USDT", "ETH USDT"],
-    },
-  ];
-
   return (
     <>
       <div className="flex flex-col min-h-screen ">
-        {/* Header */}
-       
         {/* Sub Navigation */}
         <div className="border-b border-gray-200 shadow-sm bg-white">
           <div className="container mx-auto px-4">
@@ -150,7 +119,7 @@ const WalletDashboard = () => {
                   </div>
 
                   <div className="mb-8 text-sm">
-                    <span className="mr-1">Today's P/L:</span>
+                    <span className="mr-1">Today&apos;s P/L:</span>
                     <span className="text-green-500">$0.00 (0.00%)</span>
                   </div>
 
@@ -356,7 +325,6 @@ const WalletDashboard = () => {
           </div>
         </main>
       </div>
-      {/* Footer */}
     </>
   );
 };
