@@ -1,6 +1,6 @@
 export const DashboardFooter =() =>{
     return (
-        <div className="text-xl fixed bottom-0 left-0 right-0 bg-black border-t border-[#25272a] py-3 px-6 flex justify-around text-[#494a4b] md:hidden" style={{zIndex: "1000"}}>
+        <div className=" text-xl fixed bottom-0 left-0 right-0 bg-black border-t border-[#25272a] py-3 px-6 flex justify-around text-[#494a4b] md:hidden" style={{zIndex: "1000"}}>
 
     <a href="market.php" className="">
         <div className="flex flex-col items-center">

@@ -28,7 +28,7 @@ const ProfileDashboard = () => {
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 py-8 text-black">
       {/* Profile Header */}
       <div className="flex items-start gap-6 mb-12">
         <div className="relative">
