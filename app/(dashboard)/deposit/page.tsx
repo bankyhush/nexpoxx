@@ -41,7 +41,7 @@ const DepositDashboard = () => {
    name: "USDT Usdt-Erc-20",
  })
 
- const [walletAddress, setWalletAddress] = useState("0xA44c39Ba39E95087d5d6e73cb45C14e1B7B4725f")
+ const [walletAddress] = useState("0xA44c39Ba39E95087d5d6e73cb45C14e1B7B4725f")
  const [copySuccess, setCopySuccess] = useState(false)
 
  // Refs for dropdown elements
@@ -290,7 +290,7 @@ const DepositDashboard = () => {
                <ul className="list-disc pl-5 space-y-2 text-gray-300">
                  <li>Ensure the correct Deposit Status Inquiry to check on your deposit status.</li>
                  <li>Verify that the correct MEMO/Label was entered.</li>
-                 <li>Check that you haven't deposited any unlisted coins.</li>
+                 <li>Check that you haven&apos;t deposited any unlisted coins.</li>
                </ul>
              </div>
 
