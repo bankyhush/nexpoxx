@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { ChevronDown, Eye, EyeOff } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { ChevronDown, ChevronRight, Circle, Copy, ExternalLink } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 interface CryptoCoin {
@@ -16,15 +15,33 @@ interface CryptoCoin {
 interface Network {
   id: string
   name: string
+  icon: string
+  color: string
 }
 
 interface WithdrawalAddress {
   id: string
   label: string
   address: string
+  network: string
 }
 
-const WithdrawDashboard = ()=> {
+interface WithdrawalHistory {
+  id: string
+  time: string
+  reference: string
+  address: string
+  addressShort: string
+  network: string
+  txid: string
+  txidShort: string
+  crypto: string
+  amount: number
+  fee: number
+  status: string
+}
+
+const WithdrawalPage = () => {
   // State for dropdown visibility
   const [coinDropdownOpen, setCoinDropdownOpen] = useState(false)
   const [networkDropdownOpen, setNetworkDropdownOpen] = useState(false)
@@ -32,21 +49,25 @@ const WithdrawDashboard = ()=> {
 
   // State for selected values
   const [selectedCoin, setSelectedCoin] = useState<CryptoCoin>({
-    id: "btc",
-    symbol: "BTC",
-    name: "Bitcoin",
-    icon: "₿",
-    color: "from-orange-400 to-orange-600",
+    id: "usdt",
+    symbol: "USDT",
+    name: "Tether",
+    icon: "T",
+    color: "bg-teal-500",
   })
 
-  const [selectedNetwork, setSelectedNetwork] = useState<Network | null>(null)
-  const [selectedAddress, setSelectedAddress] = useState<WithdrawalAddress | null>(null)
+  const [selectedNetwork, setSelectedNetwork] = useState<Network>({
+    id: "optimism",
+    name: "Optimism",
+    icon: "OP",
+    color: "bg-red-500",
+  })
 
-  // State for form inputs
-  const [fundPassword, setFundPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [amount, setAmount] = useState("")
-  const [otp, setOtp] = useState("")
+  const [selectedAddress, setSelectedAddress] = useState<WithdrawalAddress | null>(null)
+  const [customAddress, setCustomAddress] = useState("")
+  const [withdrawalType, setWithdrawalType] = useState("on-chain")
+  const [withdrawalAmount, setWithdrawalAmount] = useState("")
+  const [activeTab, setActiveTab] = useState("usdt")
 
   // Refs for dropdown elements
   const coinDropdownRef = useRef<HTMLDivElement>(null)
@@ -55,43 +76,112 @@ const WithdrawDashboard = ()=> {
 
   // Sample data for cryptocurrencies
   const coins: CryptoCoin[] = [
-    { id: "btc", symbol: "BTC", name: "Bitcoin", icon: "₿", color: "from-orange-400 to-orange-600" },
-    { id: "eth", symbol: "ETH", name: "Ethereum", icon: "Ξ", color: "from-purple-400 to-purple-600" },
-    { id: "usdt", symbol: "USDT", name: "Tether", icon: "T", color: "from-teal-400 to-teal-600" },
-    { id: "sol", symbol: "SOL", name: "Solana", icon: "S", color: "from-blue-400 to-blue-600" },
-    { id: "xrp", symbol: "XRP", name: "Ripple", icon: "X", color: "from-gray-400 to-gray-600" },
+    { id: "usdt", symbol: "USDT", name: "Tether", icon: "T", color: "bg-teal-500" },
+    { id: "btc", symbol: "BTC", name: "Bitcoin", icon: "₿", color: "bg-orange-500" },
+    { id: "eth", symbol: "ETH", name: "Ethereum", icon: "Ξ", color: "bg-purple-500" },
+    { id: "sol", symbol: "SOL", name: "Solana", icon: "S", color: "bg-blue-500" },
+    { id: "xrp", symbol: "XRP", name: "Ripple", icon: "X", color: "bg-gray-500" },
   ]
 
-  // Networks for BTC
-  const btcNetworks: Network[] = [
-    { id: "btc", name: "Bitcoin" },
-    { id: "lightning", name: "Lightning Network" },
-  ]
-
-  // Networks for ETH
-  const ethNetworks: Network[] = [
-    { id: "eth", name: "Ethereum" },
-    { id: "arbitrum", name: "Arbitrum" },
-    { id: "optimism", name: "Optimism" },
+  // Networks for USDT
+  const usdtNetworks: Network[] = [
+    { id: "optimism", name: "Optimism", icon: "OP", color: "bg-red-500" },
+    { id: "ethereum", name: "Ethereum", icon: "ETH", color: "bg-purple-500" },
+    { id: "tron", name: "Tron", icon: "TRX", color: "bg-red-600" },
+    { id: "bsc", name: "BNB Smart Chain", icon: "BSC", color: "bg-yellow-500" },
+    { id: "polygon", name: "Polygon", icon: "MATIC", color: "bg-purple-600" },
   ]
 
   // Get networks based on selected coin
   const getNetworksForCoin = (coinId: string): Network[] => {
     switch (coinId) {
-      case "btc":
-        return btcNetworks
-      case "eth":
-        return ethNetworks
+      case "usdt":
+        return usdtNetworks
       default:
-        return [{ id: "default", name: "Default Network" }]
+        return usdtNetworks
     }
   }
 
   // Sample withdrawal addresses
   const withdrawalAddresses: WithdrawalAddress[] = [
-    { id: "addr1", label: "My Hardware Wallet", address: "bc1q9h6mqc7stvak8qj2lmxh3j4zs09jgvpk4n2hnn" },
-    { id: "addr2", label: "Exchange Account", address: "3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5" },
-    { id: "addr3", label: "Cold Storage", address: "1BoatSLRHtKNngkdXEeobR76b53LETtpyT" },
+    {
+      id: "addr1",
+      label: "My Wallet",
+      address: "TQXq3vXBYnRr1cjAq7bbt",
+      network: "Tron(TRC20)",
+    },
+    {
+      id: "addr2",
+      label: "Exchange",
+      address: "TDEFkTMA26CKsjZ74bcd",
+      network: "Tron(TRC20)",
+    },
+    {
+      id: "addr3",
+      label: "Cold Storage",
+      address: "THRCU7at3Ikqf4QSATU",
+      network: "Tron(TRC20)",
+    },
+  ]
+
+  // Sample withdrawal history
+  const withdrawalHistory: WithdrawalHistory[] = [
+    {
+      id: "1",
+      time: "07/13/2024, 17:56:36",
+      reference: "214552800",
+      address: "TQXq3vXBYnRr1cjAq7bbtuMfoZQx9Hkqa",
+      addressShort: "TQXq3vXBYnRr1cjAq7bbt",
+      network: "Tron(TRC20)",
+      txid: "7760....5bc9",
+      txidShort: "7760....5bc9",
+      crypto: "USDT",
+      amount: 5,
+      fee: 1,
+      status: "Sent",
+    },
+    {
+      id: "2",
+      time: "07/13/2024, 16:19:35",
+      reference: "214531611",
+      address: "TDEFkTMA26CKsjZ74bcdjdENkSZB2EHEr",
+      addressShort: "TDEFkTMA26CKsjZ74bcd",
+      network: "Tron(TRC20)",
+      txid: "414a....fe13",
+      txidShort: "414a....fe13",
+      crypto: "USDT",
+      amount: 11.3,
+      fee: 1,
+      status: "Sent",
+    },
+    {
+      id: "3",
+      time: "07/09/2024, 13:52:58",
+      reference: "213405902",
+      address: "THRCU7at3Ikqf4QSATUGTvbBnSaYQXKCB",
+      addressShort: "THRCU7at3Ikqf4QSATU",
+      network: "Tron(TRC20)",
+      txid: "bda4....7c28",
+      txidShort: "bda4....7c28",
+      crypto: "USDT",
+      amount: 11.3,
+      fee: 1,
+      status: "Sent",
+    },
+    {
+      id: "4",
+      time: "07/07/2024, 17:34:59",
+      reference: "212977639",
+      address: "TDn1HPkBo6pHBK7yMWudxv8wbAXXHB6jp",
+      addressShort: "TDn1HPkBo6pHBK7yMW",
+      network: "Tron(TRC20)",
+      txid: "1d91....9465",
+      txidShort: "1d91....9465",
+      crypto: "USDT",
+      amount: 11.4,
+      fee: 1,
+      status: "Sent",
+    },
   ]
 
   // Handle clicking outside to close dropdowns
@@ -118,8 +208,7 @@ const WithdrawDashboard = ()=> {
   const handleCoinSelect = (coin: CryptoCoin) => {
     setSelectedCoin(coin)
     setCoinDropdownOpen(false)
-    setSelectedNetwork(null)
-    setSelectedAddress(null)
+    setSelectedNetwork(getNetworksForCoin(coin.id)[0])
   }
 
   // Handle network selection
@@ -132,237 +221,326 @@ const WithdrawDashboard = ()=> {
   const handleAddressSelect = (address: WithdrawalAddress) => {
     setSelectedAddress(address)
     setAddressDropdownOpen(false)
+    setCustomAddress(address.address)
   }
 
-  // Handle withdraw button click
-  const handleWithdraw = () => {
-    if (!selectedNetwork) {
-      alert("Please select a network")
-      return
-    }
-    if (!selectedAddress) {
-      alert("Please select a withdrawal address")
-      return
-    }
-    if (!fundPassword) {
-      alert("Please enter your fund password")
-      return
-    }
-    if (!amount) {
-      alert("Please enter an amount")
-      return
-    }
-    if (!otp) {
-      alert("Please enter OTP")
-      return
-    }
-
-    // Here you would handle the actual withdrawal process
-    alert(`Withdrawal initiated for ${amount} ${selectedCoin.symbol}`)
+  // Handle copy address
+  const handleCopyAddress = (text: string) => {
+    navigator.clipboard.writeText(text)
+    // You could add a toast notification here
   }
 
   return (
-    <div className="min-h-screen bg-stone-900/20 mb-20 shadow-stone-800 border-1 text-white p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Tab Navigation */}
-        <div className="mb-6">
-          <div className="inline-block bg-white text-[#121212] px-6 py-3 rounded-t-lg font-medium">
-            <span className="text-orange-500">Crypto</span>
+    <div className="bg-gray-600/15 max-w-7xl mx-auto p-4 md:p-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column - Withdrawal Form */}
+        <div className="lg:col-span-2">
+          <h1 className="text-2xl font-bold mb-8">Withdrawal</h1>
+
+          <div className="space-y-8">
+            {/* Step 1: Select Crypto */}
+            <div className="flex items-start">
+              <div className="flex-shrink-0 mr-4">
+                <div className="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 font-medium">
+                  1
+                </div>
+              </div>
+              <div className="flex-grow">
+                <h2 className="text-lg font-medium mb-3">Select crypto</h2>
+                <div ref={coinDropdownRef} className="relative">
+                  <button
+                    className="w-full flex items-center justify-between bg-gray-100 rounded-md p-3"
+                    onClick={() => setCoinDropdownOpen(!coinDropdownOpen)}
+                  >
+                    <div className="flex items-center">
+                      <div
+                        className={`w-6 h-6 rounded-full ${selectedCoin.color} mr-2 flex items-center justify-center text-white font-bold text-xs`}
+                      >
+                        {selectedCoin.icon}
+                      </div>
+                      <span>{selectedCoin.symbol}</span>
+                    </div>
+                    <ChevronDown className="h-5 w-5 text-gray-400" />
+                  </button>
+
+                  {coinDropdownOpen && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                      {coins.map((coin) => (
+                        <div
+                          key={coin.id}
+                          className="flex items-center p-3 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleCoinSelect(coin)}
+                        >
+                          <div
+                            className={`w-6 h-6 rounded-full ${coin.color} mr-2 flex items-center justify-center text-white font-bold text-xs`}
+                          >
+                            {coin.icon}
+                          </div>
+                          <span>{coin.symbol}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2: Set Destination */}
+            <div className="flex items-start">
+              <div className="flex-shrink-0 mr-4">
+                <div className="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 font-medium">
+                  2
+                </div>
+              </div>
+              <div className="flex-grow">
+                <h2 className="text-lg font-medium mb-3">Set destination</h2>
+
+                {/* Withdrawal Type Tabs */}
+                <div className="mb-4">
+                  <div className="flex border-b border-gray-200">
+                    <button
+                      className={`py-2 px-4 font-medium ${
+                        withdrawalType === "on-chain"
+                          ? "text-red-500 border-b-2 border-red-500"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                      onClick={() => setWithdrawalType("on-chain")}
+                    >
+                      On-chain withdrawal
+                    </button>
+                    <button
+                      className={`py-2 px-4 font-medium ${
+                        withdrawalType === "internal"
+                          ? "text-red-500 border-b-2 border-red-500"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                      onClick={() => setWithdrawalType("internal")}
+                    >
+                      Internal withdrawal
+                    </button>
+                  </div>
+                </div>
+
+                {/* Network Selection */}
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Network</label>
+                  <div ref={networkDropdownRef} className="relative">
+                    <button
+                      className="w-full flex items-center justify-between bg-gray-100 rounded-md p-3"
+                      onClick={() => setNetworkDropdownOpen(!networkDropdownOpen)}
+                    >
+                      <div className="flex items-center">
+                        <div
+                          className={`w-6 h-6 rounded-full ${selectedNetwork.color} mr-2 flex items-center justify-center text-white font-bold text-xs`}
+                        >
+                          {selectedNetwork.icon}
+                        </div>
+                        <span>{selectedNetwork.name}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Circle className="h-4 w-4 text-gray-400 mr-1" />
+                        <ChevronDown className="h-5 w-5 text-gray-400" />
+                      </div>
+                    </button>
+
+                    {networkDropdownOpen && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                        {getNetworksForCoin(selectedCoin.id).map((network) => (
+                          <div
+                            key={network.id}
+                            className="flex items-center p-3 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => handleNetworkSelect(network)}
+                          >
+                            <div
+                              className={`w-6 h-6 rounded-full ${network.color} mr-2 flex items-center justify-center text-white font-bold text-xs`}
+                            >
+                              {network.icon}
+                            </div>
+                            <span>{network.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Address */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-gray-700">Address</label>
+                    <button className="text-blue-500 text-sm flex items-center hover:underline">
+                      Manage address book <ChevronRight className="h-4 w-4 ml-1" />
+                    </button>
+                  </div>
+                  <div ref={addressDropdownRef} className="relative">
+                    <div className="flex">
+                      <div className="relative w-full">
+                        <Input
+                          type="text"
+                          placeholder="Enter address or select from address book"
+                          className="w-full border-gray-300 rounded-md pr-10"
+                          value={customAddress}
+                          onChange={(e) => setCustomAddress(e.target.value)}
+                        />
+                        <button
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                          onClick={() => setAddressDropdownOpen(!addressDropdownOpen)}
+                        >
+                          <ChevronDown className="h-5 w-5 text-gray-400" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {addressDropdownOpen && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                        {withdrawalAddresses.map((address) => (
+                          <div
+                            key={address.id}
+                            className="p-3 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => handleAddressSelect(address)}
+                          >
+                            <div className="font-medium">{address.label}</div>
+                            <div className="text-sm text-gray-500 flex items-center justify-between">
+                              <span>{address.address}</span>
+                              <span className="text-xs bg-gray-200 px-2 py-1 rounded">{address.network}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-red-500 text-sm mt-1">Enter withdrawal address</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3: Set Withdrawal Amount */}
+            <div className="flex items-start">
+              <div className="flex-shrink-0 mr-4">
+                <div className="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 font-medium">
+                  3
+                </div>
+              </div>
+              <div className="flex-grow">
+                <h2 className="text-lg font-medium mb-3">Set withdrawal amount</h2>
+                {/* Amount input would go here */}
+              </div>
+            </div>
+          </div>
+
+          {/* Withdrawal History */}
+          <div className="mt-12">
+            <div className="border-b border-gray-200 mb-4">
+              <div className="flex">
+                <button
+                  className={`py-2 px-4 font-medium ${
+                    activeTab === "usdt" ? "text-black border-b-2 border-black" : "text-gray-500 hover:text-gray-700"
+                  }`}
+                  onClick={() => setActiveTab("usdt")}
+                >
+                  USDT withdrawals
+                </button>
+                <button
+                  className={`py-2 px-4 font-medium ${
+                    activeTab === "all" ? "text-black border-b-2 border-black" : "text-gray-500 hover:text-gray-700"
+                  }`}
+                  onClick={() => setActiveTab("all")}
+                >
+                  All withdrawals
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end mb-4">
+              <button className="text-blue-500 text-sm flex items-center hover:underline">
+                Open history <ChevronRight className="h-4 w-4 ml-1" />
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3">Time</th>
+                    <th className="px-4 py-3">Reference no.</th>
+                    <th className="px-4 py-3">Address</th>
+                    <th className="px-4 py-3">TXID</th>
+                    <th className="px-4 py-3">Crypto</th>
+                    <th className="px-4 py-3">Amount</th>
+                    <th className="px-4 py-3">Fee</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {withdrawalHistory.map((item) => (
+                    <tr key={item.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{item.time}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{item.reference}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                        <div className="flex flex-col">
+                          <div className="flex items-center">
+                            <span className="text-gray-900">{item.addressShort}</span>
+                            <button
+                              className="ml-2 text-gray-400 hover:text-gray-600"
+                              onClick={() => handleCopyAddress(item.address)}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <span className="text-gray-500 text-xs">{item.network}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                        <div className="flex items-center text-blue-500">
+                          <span>{item.txidShort}</span>
+                          <ExternalLink className="h-4 w-4 ml-1" />
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{item.crypto}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{item.amount}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{item.fee}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                        <span className="px-2 py-1 text-blue-800 text-xs font-medium bg-blue-100 rounded-full">
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                        <button className="text-blue-500 hover:underline">View</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column */}
-          <div className="space-y-6">
-            {/* Select Coin */}
-            <div ref={coinDropdownRef} className="relative">
-              <label className="block text-white mb-2">Select Coin</label>
-              <button
-                className="w-full flex items-center justify-between bg-[#1a1a1a] border border-[#333] rounded-md p-3 text-white"
-                onClick={() => setCoinDropdownOpen(!coinDropdownOpen)}
-              >
-                <div className="flex items-center">
-                  <div className="w-8 h-8 mr-2 relative">
-                    <div className={`absolute inset-0 bg-gradient-to-br ${selectedCoin.color} rounded-full`}></div>
-                    <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs">
-                      {selectedCoin.icon}
-                    </div>
-                  </div>
-                  <span>{selectedCoin.symbol}</span>
-                </div>
-                <ChevronDown className="h-5 w-5 text-gray-400" />
-              </button>
-
-              {coinDropdownOpen && (
-                <div className="absolute z-10 mt-1 w-full bg-[#1a1a1a] border border-[#333] rounded-md shadow-lg max-h-60 overflow-auto">
-                  {coins.map((coin) => (
-                    <div
-                      key={coin.id}
-                      className="flex items-center p-3 hover:bg-[#222] cursor-pointer"
-                      onClick={() => handleCoinSelect(coin)}
-                    >
-                      <div className="w-8 h-8 mr-2 relative">
-                        <div className={`absolute inset-0 bg-gradient-to-br ${coin.color} rounded-full`}></div>
-                        <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs">
-                          {coin.icon}
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium">{coin.symbol}</div>
-                        <div className="text-sm text-gray-400">{coin.name}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Warning Messages */}
-            <div className="bg-[#1a1a1a] border border-[#333] rounded-md p-4">
-              <ul className="list-disc pl-5 space-y-2 text-orange-500">
-                <li className="text-sm">
-                  Do not crowdfund or directly withdraw to ICO addresses as tokens from such sales will not be credited
-                  to your account.
-                </li>
-                <li className="text-sm">
-                  Transfers between Cryptimize accounts are internal transfers, there is no transaction fee for internal
-                  transfers and the entire amount you enter in the amount section is sent to the recipient.
-                </li>
-              </ul>
-            </div>
-
-            {/* Network */}
-            <div ref={networkDropdownRef} className="relative">
-              <label className="block text-white mb-2">Network</label>
-              <button
-                className="w-full flex items-center justify-between bg-[#1a1a1a] border border-[#333] rounded-md p-3 text-white"
-                onClick={() => setNetworkDropdownOpen(!networkDropdownOpen)}
-              >
-                <span>{selectedNetwork ? selectedNetwork.name : "Please select network"}</span>
-                <ChevronDown className="h-5 w-5 text-gray-400" />
-              </button>
-
-              {networkDropdownOpen && (
-                <div className="absolute z-10 mt-1 w-full bg-[#1a1a1a] border border-[#333] rounded-md shadow-lg max-h-60 overflow-auto">
-                  {getNetworksForCoin(selectedCoin.id).map((network) => (
-                    <div
-                      key={network.id}
-                      className="p-3 hover:bg-[#222] cursor-pointer"
-                      onClick={() => handleNetworkSelect(network)}
-                    >
-                      <span>{network.name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <p className="text-gray-400 text-sm mt-2">
-                Make sure the network you choose for the deposit matches the withdrawal network or your assets may be
-                lost.
-              </p>
-            </div>
-
-            {/* BTC Withdrawal Address */}
-            <div ref={addressDropdownRef} className="relative">
-              <label className="block text-white mb-2">{selectedCoin.symbol} Withdrawal Address</label>
-              <button
-                className="w-full flex items-center justify-between bg-[#1a1a1a] border border-[#333] rounded-md p-3 text-white"
-                onClick={() => setAddressDropdownOpen(!addressDropdownOpen)}
-              >
-                <span>{selectedAddress ? selectedAddress.label : "Select withdrawals address"}</span>
-                <ChevronDown className="h-5 w-5 text-gray-400" />
-              </button>
-
-              {addressDropdownOpen && (
-                <div className="absolute z-10 mt-1 w-full bg-[#1a1a1a] border border-[#333] rounded-md shadow-lg max-h-60 overflow-auto">
-                  {withdrawalAddresses.map((address) => (
-                    <div
-                      key={address.id}
-                      className="p-3 hover:bg-[#222] cursor-pointer"
-                      onClick={() => handleAddressSelect(address)}
-                    >
-                      <div className="font-medium">{address.label}</div>
-                      <div className="text-sm text-gray-400 truncate">{address.address}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+        {/* Right Column - FAQ and Limits */}
+        <div className="space-y-8">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-xl font-bold mb-4">FAQ</h2>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-medium text-gray-900 mb-1">How do I make a withdrawal?</h3>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900 mb-1">Why have I still not received my withdrawal?</h3>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900 mb-1">
+                  How do I select the correct network for my crypto withdrawals and deposits?
+                </h3>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900 mb-1">Do I need to pay fees for deposit and withdrawal?</h3>
+              </div>
             </div>
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-6">
-            {/* Fund Password */}
-            <div>
-              <label className="block text-white mb-2">Fund Password</label>
-              <div className="relative">
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter Funding Password"
-                  className="w-full bg-[#1a1a1a] border-[#333] text-white"
-                  value={fundPassword}
-                  onChange={(e) => setFundPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
-              <div className="mt-2">
-                <a href="#" className="text-orange-500 text-sm hover:underline">
-                  I forgot my password?
-                </a>
-              </div>
-            </div>
-
-            {/* Balance */}
-            <div className="bg-gray-600 bg-opacity-30 rounded-md p-3">
-              <div className="text-gray-300">Balance: 0 {selectedCoin.symbol}≈0 USDT</div>
-            </div>
-
-            {/* Amount */}
-            <div>
-              <label className="block text-white mb-2">Amount</label>
-              <Input
-                type="text"
-                placeholder={`Minimum 0`}
-                className="w-full bg-[#1a1a1a] border-[#333] text-white"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
-            </div>
-
-            {/* OTP */}
-            <div>
-              <div className="flex space-x-2">
-                <Input
-                  type="text"
-                  placeholder="Enter OTP"
-                  className="flex-1 bg-[#1a1a1a] border-[#333] text-white"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                />
-                <Button className="bg-[#1a1a1a] border border-[#333] hover:bg-[#222] text-white">Request OPT</Button>
-              </div>
-            </div>
-
-            {/* Receivable and Withdraw Button */}
-            <div className="flex items-center justify-between mt-8">
-              <div className="text-white">Receiveable: 0.00 {selectedCoin.symbol}</div>
-              <Button
-                className="bg-orange-500 hover:bg-orange-600 text-black font-medium px-8 py-2"
-                onClick={handleWithdraw}
-              >
-                Withdraw
-              </Button>
-            </div>
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-lg font-medium mb-2">24h available limit</h2>
+            <p className="text-gray-900 font-medium">9,992,457.63 / 9,992,457.63 USDT</p>
           </div>
         </div>
       </div>
@@ -370,4 +548,4 @@ const WithdrawDashboard = ()=> {
   )
 }
 
-export default WithdrawDashboard
+export default WithdrawalPage
