@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { HeroHeader } from "@/components/hero8-header";
-import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiMail, FiLock, FiEye, FiEyeOff, FiUser } from "react-icons/fi";
 import { CgSpinnerTwoAlt } from "react-icons/cg";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -19,6 +19,7 @@ export default function RegisterForm() {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
+    fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -38,7 +39,7 @@ export default function RegisterForm() {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-    toast.dismiss();
+      toast.dismiss();
       toast.error("Passwords do not match");
       return;
     }
@@ -46,12 +47,13 @@ export default function RegisterForm() {
     setIsLoading(true);
 
     try {
-        toast.dismiss();
+      toast.dismiss();
       await toast.promise(
         fetch("/api/auth_api/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            fullName: formData.fullName,
             email: formData.email,
             password: formData.password,
           }),
@@ -66,7 +68,8 @@ export default function RegisterForm() {
           error: (err) => err.message || "Failed to register",
         }
       );
-
+      localStorage.setItem("verifySession", "true");
+      localStorage.setItem("verifyEmail", formData.email);
       router.push("/verify-otp");
     } catch (err) {
       console.error("Registration error:", err);
@@ -116,13 +119,28 @@ export default function RegisterForm() {
                 Ensure this email can receive verification codes.
               </span>
 
-              {/* 🔄 Spinner while loading */}
               {loading ? (
                 <div className="flex items-center justify-center h-[280px]">
                   <div className="w-10 h-10 border-4 border-gray-300 border-t-primary rounded-full animate-spin" />
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="w-full mx-auto p-6 bg-white dark:bg-background shadow-md rounded-lg">
+                <form
+                  onSubmit={handleSubmit}
+                  className="w-full mx-auto p-6 bg-white dark:bg-background shadow-md rounded-lg"
+                >
+                  {/* Full Name Field */}
+                  <div className="mb-6 relative">
+                    <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+                    <Input
+                      type="text"
+                      placeholder="Full Name"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-3 py-3 rounded-md border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+
                   {/* Email Field */}
                   <div className="mb-6 relative">
                     <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
@@ -178,12 +196,19 @@ export default function RegisterForm() {
                     </button>
                   </div>
 
-                  <Button  disabled={isLoading} className={` ${
-              isLoading
-                ? "cursor-not-allowed bg-gray-500 text-white hover:bg-gray-500"
-                : "cursor-pointer"
-            } w-full bg-primary text-white hover:shadow-lg dark:bg-primary-dark py-3 rounded-md`}>
-                    {isLoading ? (<CgSpinnerTwoAlt className="animate-spin text-4xl"/>) : "Sign up"}
+                  <Button
+                    disabled={isLoading}
+                    className={`${
+                      isLoading
+                        ? "cursor-not-allowed bg-gray-500 text-white hover:bg-gray-500"
+                        : "cursor-pointer"
+                    } w-full bg-primary text-white hover:shadow-lg dark:bg-primary-dark py-3 rounded-md`}
+                  >
+                    {isLoading ? (
+                      <CgSpinnerTwoAlt className="animate-spin text-4xl" />
+                    ) : (
+                      "Sign up"
+                    )}
                   </Button>
                 </form>
               )}

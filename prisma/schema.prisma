@@ -1,4 +1,3 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,58 +7,83 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model for storing user data, including authentication and wallet details
 model User {
-  id            Int           @id @default(autoincrement())
-  fullName      String?       @db.VarChar(100)
-  phoneNumber   String?       @db.VarChar(20) // Optional phone number
-  country       String?       @db.VarChar(50) // Optional country
-  email         String        @unique @db.VarChar(255)
-  password      String        @db.VarChar(255) // Hashed password
-  inviteCode    String        @unique @db.VarChar(8) // Unique code for referrals
-  accountType   String        @default("standard") @db.VarChar(20) // e.g., standard, premium
-  stoken        String?       @db.VarChar(6) // OTP for email verification or password reset
-  walletAddress String        @unique @db.VarChar(50) // Unique wallet address
-  createdAt     DateTime      @default(now())
-  balances      UserBalance[] // Relation to user balances for each coin
-  tickets       Ticket[] // Relation to support tickets
+  id                 Int                  @id @default(autoincrement())
+  fullName           String?              @db.VarChar(100)
+  phoneNumber        String?              @db.VarChar(20)
+  country            String?              @db.VarChar(50)
+  email              String               @unique @db.VarChar(255)
+  password           String               @db.VarChar(255)
+  inviteCode         String               @unique @db.VarChar(8)
+  accountType        String               @default("standard") @db.VarChar(20)
+  stoken             String?              @db.VarChar(6)
+  walletAddress      String               @unique @db.VarChar(50)
+  kycStatus          String               @default("Pending") @db.VarChar(20) // New
+  frontImage         String?              @db.VarChar(255)                    // New
+  backImage          String?              @db.VarChar(255)                    // New
+  verified           Boolean              @default(false)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  role               Role                 @default(USER)
+  balances           UserBalance[]
+  tickets            Ticket[]
+  transactionHistory TransactionHistory[]
 
-  @@index([email]) // Index for faster email lookups
-  @@index([walletAddress]) // Index for faster wallet address lookups
+  @@index([email])
+  @@index([walletAddress])
 }
 
-// Coin model for storing cryptocurrency details with real-time price
+enum Role {
+  USER
+  ADMIN
+}
+
+model TransactionHistory {
+  id        String   @id @default(uuid())
+  title     String
+  amount    Float
+  status    String
+  type      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
 model Coin {
   id                  Int           @id @default(autoincrement())
-  coinName            String        @unique @db.VarChar(50) // e.g., bitcoin, ethereum
-  coinTitle           String        @db.VarChar(100) // Display name, e.g., Bitcoin (BTC)
-  coinRate            Decimal       @db.Decimal(10, 3) // Real-time price, updated via API
-  photo               String?       @db.VarChar(255) // URL to coin logo
-  createdAt           DateTime      @default(now()) @updatedAt
-  withMin             String?       @db.VarChar(50) // Minimum withdrawal amount
-  withMax             String?       @db.VarChar(50) // Maximum withdrawal amount
-  withInstructions    String?       @db.Text // Withdrawal instructions
-  depositInstructions String?       @db.Text // Deposit instructions
-  depositAddress      String?       @db.VarChar(255) // Deposit address for the coin
-  percent             String?       @db.VarChar(10) // Percentage for fees or staking
-  coinVisible         Boolean       @default(true) // Whether coin is visible to users
-  balances            UserBalance[] // Relation to user balances
+  coinName            String        @unique @db.VarChar(50)
+  coinTitle           String        @db.VarChar(100)
+  coinRate            Decimal       @db.Decimal(10, 3)
+  photo               String?       @db.VarChar(255)
+  createdAt           DateTime      @default(now())
+  withMin             Int?
+  withMax             Int?
+  withInstructions    String?       @db.Text
+  depositInstructions String?       @db.Text
+  depositAddress      String?       @db.VarChar(255)
+  percent             String?       @db.VarChar(10)
+  desc                String?       @db.Text
+  coinVisible         Boolean       @default(true)
+  balances            UserBalance[]
 
-  @@index([coinName]) // Index for faster coin lookups
+  @@index([coinName])
 }
 
-// Support ticket model for user inquiries
 model Ticket {
   id        Int          @id @default(autoincrement())
-  user      User         @relation(fields: [userId], references: [id])
   userId    Int
+  user      User         @relation(fields: [userId], references: [id])
   subject   String       @db.VarChar(255)
   status    TicketStatus @default(open)
-  isRead    Boolean      @default(false) // User read status
-  adminRead Boolean      @default(false) // Admin read status
-  createdAt DateTime     @default(now()) @updatedAt
+  isRead    Boolean      @default(false)
+  adminRead Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
-  @@index([userId]) // Index for faster user-based queries
+  @@index([userId])
 }
 
 enum TicketStatus {
@@ -67,38 +91,36 @@ enum TicketStatus {
   closed
 }
 
-// UserBalance model to track user balances for each coin
 model UserBalance {
   id        Int     @id @default(autoincrement())
-  user      User?   @relation(fields: [userId], references: [id])
   userId    Int
-  coin      Coin?   @relation(fields: [coinId], references: [id])
   coinId    Int
-  available Decimal @default(0.00) @db.Decimal(18, 2) // Available balance
-  onOrder   Decimal @default(0.00) @db.Decimal(18, 2) // Balance locked in orders
-  staked    Decimal @default(0.00) @db.Decimal(18, 2) // Staked balance
+  user      User    @relation(fields: [userId], references: [id])
+  coin      Coin    @relation(fields: [coinId], references: [id])
+  available Decimal @default(0.00) @db.Decimal(18, 2)
+  onOrder   Decimal @default(0.00) @db.Decimal(18, 2)
+  staked    Decimal @default(0.00) @db.Decimal(18, 2)
 
-  @@unique([userId, coinId]) // Ensure one balance per user-coin pair
-  @@index([userId, coinId]) // Index for faster balance queries
+  @@unique([userId, coinId])
+  @@index([userId, coinId])
 }
 
-// CopyTrader model for copy trading feature
 model CopyTrader {
   id           Int      @id @default(autoincrement())
-  name         String   @db.VarChar(100) // Trader's name
-  photo        String?  @db.VarChar(255) // Trader's profile picture
-  noTrades     String   @db.VarChar(50) // Number of trades
-  noCopiers    String   @db.VarChar(50) // Number of users copying
-  status       String   @db.VarChar(20) // e.g., active, inactive
-  noWins       String   @db.VarChar(50) // Number of winning trades
-  rank         String   @db.VarChar(50) // Trader rank
-  strategyDesc String?  @db.Text // Trading strategy description
-  noLoss       String   @db.VarChar(50) // Number of losing trades
-  profit       String   @db.VarChar(50) // Total profit
-  loss         String   @db.VarChar(50) // Total loss
-  edate        String   @db.VarChar(50) // End date for trading period
-  commission   String   @default("100") @db.VarChar(10) // Commission percentage
+  name         String   @db.VarChar(100)
+  photo        String?  @db.VarChar(255)
+  noTrades     String   @db.VarChar(50)
+  noCopiers    String   @db.VarChar(50)
+  status       String   @db.VarChar(20)
+  noWins       String   @db.VarChar(50)
+  rank         String   @db.VarChar(50)
+  strategyDesc String?  @db.Text
+  noLoss       String   @db.VarChar(50)
+  profit       String   @db.VarChar(50)
+  loss         String   @db.VarChar(50)
+  edate        String   @db.VarChar(50)
+  commission   String   @default("100") @db.VarChar(10)
   createdAt    DateTime @default(now())
 
-  @@index([name]) // Index for faster trader lookups
+  @@index([name])
 }

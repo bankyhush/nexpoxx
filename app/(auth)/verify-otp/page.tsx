@@ -1,8 +1,9 @@
-import React from 'react'
+
+import VerifysForm from './verifyForm'
 
 const VerifyOTPUI = () => {
   return (
-    <div>VerifyOTPUI</div>
+    <VerifysForm />
   )
 }
 

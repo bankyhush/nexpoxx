@@ -1,39 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import bcrypt from "bcrypt";
 import { nanoid } from "nanoid";
 import prisma from "@/connections/prisma";
 import { sendOtpEmail } from "@/lib/email";
-import { createToken } from "@/lib/auth";
+import { SignJWT } from "jose";
+
+// JWT Token generator (using jose)
+async function createToken(payload: {
+  id: string;
+  email: string;
+  role: string;
+}) {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET is not set");
+
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setIssuer("myapp")
+    .setExpirationTime("1h")
+    .sign(new TextEncoder().encode(secret));
+}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, password } = body;
+    const { email, fullName, password } = body;
 
-    // === Validate Input ===
-    if (!email || !password) {
+    if (!email || !fullName || !password) {
       return NextResponse.json(
-        { success: false, error: "Email and password are required" },
+        { success: false, error: "All fields are required" },
         { status: 400 }
       );
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
+    if (!emailRegex.test(email)) {
       return NextResponse.json(
         { success: false, error: "Invalid email address" },
         { status: 400 }
       );
     }
 
-    if (!password || password.length < 8) {
+    if (password.length < 8) {
       return NextResponse.json(
         { success: false, error: "Password must be at least 8 characters" },
         { status: 400 }
       );
     }
 
-    // === Check if User Exists ===
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return NextResponse.json(
@@ -42,7 +58,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // === Secure User Creation ===
     const hashedPassword = await bcrypt.hash(password, 10);
     const walletAddress = `NX0${nanoid(31)}`;
     const inviteCode = nanoid(8);
@@ -51,6 +66,7 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({
       data: {
         email,
+        fullName,
         password: hashedPassword,
         walletAddress,
         inviteCode,
@@ -59,7 +75,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // === Initialize User Balances ===
     const coins = await prisma.coin.findMany({ where: { coinVisible: true } });
     await prisma.userBalance.createMany({
       data: coins.map((coin) => ({
@@ -71,20 +86,31 @@ export async function POST(req: NextRequest) {
       })),
     });
 
-    // === Send OTP Email ===
     await sendOtpEmail(email, otp);
 
-    // === Create JWT Token ===
     const token = await createToken({
       id: user.id.toString(),
       email: user.email,
       role: user.role,
     });
 
+    const oneDayInSeconds = 60 * 60 * 24;
+
+    // Set secure HTTP-only cookie
+    (
+      await // Set secure HTTP-only cookie
+      cookies()
+    ).set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: oneDayInSeconds,
+    });
+
     return NextResponse.json({
       success: true,
       message: "Registration successful, OTP sent to email",
-      token,
       user: {
         id: user.id,
         email: user.email,

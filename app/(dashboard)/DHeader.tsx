@@ -1,17 +1,14 @@
+// DHeader.tsx
+
 "use client";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import React from "react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Logo } from "@/components/logo";
-import {
-  Bell,
-  ChevronDown,
-  Globe,
-  Headphones,
-  Plus,
-} from "lucide-react"
-
+import { Bell, Globe, Headphones, Plus } from "lucide-react";
+import { useUser } from "@/hooks/useUser";
+import LogoutButton from "./DLogout";
 
 const menuItems = [
   { name: "Features", href: "#link" },
@@ -22,6 +19,7 @@ const menuItems = [
 
 export const DashboardHeader = () => {
   const [menuState, setMenuState] = React.useState(false);
+  const { data: user, isLoading } = useUser();
   return (
     <header>
       <nav
@@ -65,25 +63,21 @@ export const DashboardHeader = () => {
             </div>
 
             <div className="flex items-center space-x-3">
-            <div className="hidden md:flex items-center space-x-3 text-white">
-              
-              
-              <button className="p-2 bg-zinc-800 rounded-full">
-                <Plus className="h-4 w-4" />
-              </button>
-              <button className="p-2 bg-zinc-800 rounded-full">
-                <Bell className="h-4 w-4" />
-              </button>
-              <button className="p-2 bg-zinc-800 rounded-full">
-                <Headphones className="h-4 w-4" />
-              </button>
-              <button className="p-2 bg-zinc-800 rounded-full">
-                <Globe className="h-4 w-4" />
-              </button>
+              <div className="hidden md:flex items-center space-x-3 text-white">
+                <button className="p-2 bg-zinc-800 rounded-full">
+                  <Plus className="h-4 w-4" />
+                </button>
+                <button className="p-2 bg-zinc-800 rounded-full">
+                  <Bell className="h-4 w-4" />
+                </button>
+                <button className="p-2 bg-zinc-800 rounded-full">
+                  <Headphones className="h-4 w-4" />
+                </button>
+                <button className="p-2 bg-zinc-800 rounded-full">
+                  <Globe className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-            
-            
-          </div>
 
             <div className="bg-background in-data-[state=active]:block lg:in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
               <div className="lg:hidden">
@@ -101,11 +95,13 @@ export const DashboardHeader = () => {
                 </ul>
               </div>
               <div className="flex justify-center items-center w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-              <button className="text-white flex items-center space-x-1 bg-zinc-800 rounded-full px-3 py-1.5">
-                <div className="w-6 h-6 bg-zinc-700 rounded-full"></div>
-                <span className="text-sm">Coolaker</span>
-                <ChevronDown className="h-4 w-4" />
-              </button>
+                <button className="text-white flex items-center space-x-1 bg-zinc-800 rounded-full px-3 py-1.5">
+                  <div className="w-6 h-6 bg-zinc-700 rounded-full"></div>
+                  <span className="text-sm">
+                    {isLoading ? "Loading..." : user?.fullName}
+                  </span>
+                </button>
+                <LogoutButton />
                 <ModeToggle />
               </div>
             </div>
