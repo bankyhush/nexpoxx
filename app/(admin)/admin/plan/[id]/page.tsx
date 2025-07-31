@@ -14,7 +14,7 @@ export default function EditPlanPage() {
     min_ins: "",
     max_ins: "",
     days_duration: "",
-    daily_interest_rate: "",
+    daily_interest: "",
     status: "",
   });
 
@@ -99,7 +99,7 @@ export default function EditPlanPage() {
 
       <label>Minimum Investment</label>
       <input
-        type="number"
+        type="text"
         name="min_ins"
         value={form.min_ins}
         onChange={handleChange}
@@ -110,7 +110,7 @@ export default function EditPlanPage() {
 
       <label>Maximum Investment</label>
       <input
-        type="number"
+        type="text"
         name="max_ins"
         value={form.max_ins}
         onChange={handleChange}
@@ -121,7 +121,7 @@ export default function EditPlanPage() {
 
       <label>Days Duration</label>
       <input
-        type="number"
+        type="text"
         name="days_duration"
         value={form.days_duration}
         onChange={handleChange}
@@ -132,10 +132,10 @@ export default function EditPlanPage() {
 
       <label>Daily Interest Rate (%)</label>
       <input
-        type="number"
+        type="text"
         step="0.01"
-        name="daily_interest_rate"
-        value={form.daily_interest_rate}
+        name="daily_interest"
+        value={form.daily_interest}
         onChange={handleChange}
         required
         min={0}

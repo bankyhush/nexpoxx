@@ -76,16 +76,32 @@ const AdminHeadPage: React.FC<AdminHeadPageProps> = ({ children }) => {
       label: "Staking",
     },
     {
-      href: "/admin/security",
+      href: "/admin/pass",
       icon: <Shield className="h-5 w-5 mr-3" />,
       label: "Security",
     },
-    {
-      href: "/admin/settings",
-      icon: <Settings className="h-5 w-5 mr-3" />,
-      label: "System Settings",
-    },
   ];
+
+  const logouthandler = async () => {
+    try {
+      const res = await fetch("/api/auth_api/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.ok) {
+        // Redirect to login page
+        window.location.href = "/login";
+      } else {
+        // Optional: Handle failed logout (e.g., show an error toast)
+        console.error("Logout failed");
+      }
+    } catch (error) {
+      console.error("An error occurred during logout:", error);
+    }
+  };
 
   return (
     <div
@@ -166,17 +182,33 @@ const AdminHeadPage: React.FC<AdminHeadPageProps> = ({ children }) => {
             </Badge>
           </div>
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
-              <Settings className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={toggleTheme}>
+            <Link href="/admin/pass">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="cursor-pointer hidden sm:flex"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="cursor-pointer"
+            >
               {theme === "light" ? (
                 <Moon className="h-5 w-5" />
               ) : (
                 <Sun className="h-5 w-5" />
               )}
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="cursor-pointer"
+              onClick={logouthandler}
+            >
               <LogOut className="h-5 w-5" />
             </Button>
           </div>

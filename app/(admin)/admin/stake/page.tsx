@@ -4,26 +4,31 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { debounce } from "lodash";
 
-interface Plan {
+interface Staking {
   id: number;
-  plan_name: string;
-  status: string;
+  name: string;
+  title: string;
+  photo: string;
+  duration: string;
+  roi: string;
+  min: string;
+  max: string;
 }
 
-export default function PlanList() {
-  const [plans, setPlans] = useState<Plan[]>([]);
+export default function StakingList() {
+  const [stakingRecords, setStakingRecords] = useState<Staking[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin_api/plans");
-      if (!res.ok) throw new Error("Failed to fetch plans");
+      const res = await fetch("/api/admin_api/stakes");
+      if (!res.ok) throw new Error("Failed to fetch staking records");
       const data = await res.json();
-      setPlans(data);
+      setStakingRecords(data);
     } catch (error) {
-      toast.error("Failed to fetch plans.");
+      toast.error("Failed to fetch staking records.");
     } finally {
       setLoading(false);
     }
@@ -40,18 +45,18 @@ export default function PlanList() {
   );
 
   const filtered = search
-    ? plans.filter((p) =>
-        p.plan_name.toLowerCase().includes(search.toLowerCase())
+    ? stakingRecords.filter((s) =>
+        s.name.toLowerCase().includes(search.toLowerCase())
       )
-    : plans;
+    : stakingRecords;
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Delete plan?")) return;
+    if (!confirm("Delete staking record?")) return;
     await toast.promise(
-      fetch(`/api/admin_api/plans/${id}`, { method: "DELETE" }),
+      fetch(`/api/admin_api/stakes/${id}`, { method: "DELETE" }),
       {
         loading: "Deleting...",
-        success: "Deleted plan!",
+        success: "Deleted staking record!",
         error: "Delete failed",
       }
     );
@@ -60,17 +65,17 @@ export default function PlanList() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Plans</h1>
+      <h1 className="text-2xl font-bold mb-4">Staking Records</h1>
       <div className="flex gap-4 mb-4">
         <input
           placeholder="Search by name..."
           onChange={(e) => handleSearch(e.target.value)}
           className="border p-2 rounded"
-          aria-label="Search plans"
+          aria-label="Search staking records"
         />
-        <Link href="/admin/plan/new">
+        <Link href="/admin/stake/new">
           <button className="cursor-pointer bg-blue-600 px-4 py-2 text-white rounded">
-            + New Plan
+            + New Staking
           </button>
         </Link>
       </div>
@@ -81,24 +86,36 @@ export default function PlanList() {
         <table className="w-full border">
           <thead>
             <tr className="text-center bg-gray-300">
+              <th>Avatar</th>
               <th>Name</th>
-              <th>Status</th>
+              <th>Title</th>
+              <th>Duration</th>
+              <th>ROI</th>
+              <th>Min</th>
+              <th>Max</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((plan) => (
-              <tr key={plan.id} className="hover:bg-gray-50 text-center">
-                <td className="p-2 border">{plan.plan_name}</td>
-                <td className="p-2 border">{plan.status}</td>
+            {filtered.map((staking) => (
+              <tr key={staking.id} className="hover:bg-gray-50 text-center">
+                <td className="p-2 border">
+                  <img src={staking.photo} className="w-8 h-8" />
+                </td>
+                <td className="p-2 border">{staking.name}</td>
+                <td className="p-2 border">{staking.title}</td>
+                <td className="p-2 border">{staking.duration}</td>
+                <td className="p-2 border">{staking.roi}</td>
+                <td className="p-2 border">{staking.min}</td>
+                <td className="p-2 border">{staking.max}</td>
                 <td className="p-2 border space-x-2">
-                  <Link href={`/admin/plan/${plan.id}`}>
+                  <Link href={`/admin/stake/${staking.id}`}>
                     <button className="cursor-pointer text-blue-600">
                       Edit
                     </button>
                   </Link>
                   <button
-                    onClick={() => handleDelete(plan.id)}
+                    onClick={() => handleDelete(staking.id)}
                     className="cursor-pointer text-red-600"
                   >
                     Delete

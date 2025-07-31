@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { debounce } from "lodash";
 
 interface CopyTrader {
   id: number;
@@ -15,15 +16,31 @@ interface CopyTrader {
 export default function TraderList() {
   const [list, setList] = useState<CopyTrader[]>([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true); // Added loading state for consistency
 
   const fetchList = async () => {
-    const res = await fetch("/api/admin_api/copytraders");
-    setList(await res.json());
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin_api/copytraders");
+      if (!res.ok) throw new Error("Failed to fetch traders");
+      const data = await res.json();
+      setList(data);
+    } catch (error) {
+      toast.error("Failed to fetch traders.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchList();
   }, []);
+
+  // Debounced search handler
+  const handleSearch = useCallback(
+    debounce((value: string) => setSearch(value), 300),
+    []
+  );
 
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this trader?")) return;
@@ -55,8 +72,8 @@ export default function TraderList() {
         <input
           className="border p-2 rounded w-64"
           placeholder="Search by name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
+          aria-label="Search traders"
         />
         <Link href="/admin/copytrader/new">
           <button className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded">
@@ -65,62 +82,68 @@ export default function TraderList() {
         </Link>
       </div>
 
-      <table className="w-full table-auto border">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-2 border text-left">Photo</th>
-            <th className="p-2 border text-left">Name</th>
-            <th className="p-2 border text-left">Profit</th>
-            <th className="p-2 border text-left">Rank</th>
-            <th className="p-2 border text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((ct) => {
-            const profit = parseFloat(ct.profit) || 0;
-            const loss = parseFloat(ct.loss) || 0;
-            const gain = profit - loss;
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <table className="w-full table-auto border">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 border text-left">Photo</th>
+              <th className="p-2 border text-left">Name</th>
+              <th className="p-2 border text-left">Profit</th>
+              <th className="p-2 border text-left">Rank</th>
+              <th className="p-2 border text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((ct) => {
+              const profit = parseFloat(ct.profit) || 0;
+              const loss = parseFloat(ct.loss) || 0;
+              const gain = profit - loss;
 
-            return (
-              <tr key={ct.id} className="hover:bg-gray-50">
-                <td className="p-2 border">
-                  {ct.photo ? (
-                    <img
-                      src={ct.photo}
-                      alt={ct.name}
-                      className="w-10 h-10 object-cover rounded-full"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 bg-gray-200 rounded-full" />
-                  )}
-                </td>
-                <td className="p-2 border">{ct.name}</td>
-                <td className="p-2 border text-green-600">{ct.profit}</td>
-                <td
-                  className={`p-2 border ${
-                    gain >= 0 ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {ct.rank}
-                </td>
-                <td className="p-2 border space-x-2">
-                  <Link href={`/admin/copytrader/${ct.id}/edit`}>
-                    <button className="cursor-pointer text-blue-600">
-                      Edit
-                    </button>
-                  </Link>
-                  <button
-                    className="cursor-pointer text-red-600"
-                    onClick={() => handleDelete(ct.id)}
+              return (
+                <tr key={ct.id} className="hover:bg-gray-50">
+                  <td className="p-2 border">
+                    {ct.photo ? (
+                      <img
+                        src={ct.photo}
+                        alt={ct.name}
+                        className="w-10 h-10 object-cover rounded-full"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 bg-gray-200 rounded-full" />
+                    )}
+                  </td>
+                  <td className="p-2 border">{ct.name}</td>
+                  <td className="p-2 border text-green-600">
+                    {formatCurrency(ct.profit)}
+                  </td>
+                  <td
+                    className={`p-2 border ${
+                      gain >= 0 ? "text-green-600" : "text-red-600"
+                    }`}
                   >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                    {ct.rank}
+                  </td>
+                  <td className="p-2 border space-x-2">
+                    <Link href={`/admin/copytrader/${ct.id}/edit`}>
+                      <button className="cursor-pointer text-blue-600">
+                        Edit
+                      </button>
+                    </Link>
+                    <button
+                      className="cursor-pointer text-red-600"
+                      onClick={() => handleDelete(ct.id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

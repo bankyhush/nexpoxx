@@ -1,28 +1,38 @@
 "use client";
-
+import { useEffect, useState, useCallback } from "react";
+import toast from "react-hot-toast";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { debounce } from "lodash";
 
 export default function ViewCoinsPage() {
   const [coins, setCoins] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchCoins = async () => {
-      try {
-        const res = await fetch("/api/admin_api/coins/coinlist");
-        const data = await res.json();
-        setCoins(data);
-      } catch (error) {
-        console.error("Failed to fetch coins", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchCoins = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin_api/coins/coinlist");
+      if (!res.ok) throw new Error("Failed to fetch coins");
+      const data = await res.json();
+      setCoins(data);
+    } catch (error) {
+      toast.error("Failed to fetch coins");
+      console.error("Failed to fetch coins", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCoins();
   }, []);
+
+  // Debounced search handler
+  const handleSearch = useCallback(
+    debounce((value: string) => setSearch(value), 300),
+    []
+  );
 
   const deleteCoin = async (coinId: number) => {
     if (!confirm("Are you sure you want to delete this coin?")) return;
@@ -39,10 +49,10 @@ export default function ViewCoinsPage() {
 
       // Update the coins state by filtering out the deleted coin
       setCoins(coins.filter((coin: any) => coin.id !== coinId));
-      alert("Coin deleted successfully");
+      toast.success("Coin deleted successfully");
     } catch (error) {
       console.error("Error deleting coin:", error);
-      alert(
+      toast.error(
         `Failed to delete coin: ${
           error instanceof Error ? error.message : String(error)
         }`
@@ -69,9 +79,9 @@ export default function ViewCoinsPage() {
       <input
         type="text"
         placeholder="Search coin by name or title"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => handleSearch(e.target.value)}
         className="w-full md:w-1/3 mb-4 p-2 border rounded"
+        aria-label="Search coins"
       />
 
       {loading ? (
@@ -101,11 +111,13 @@ export default function ViewCoinsPage() {
                   <tr key={coin.id}>
                     <td className="border px-4 py-2">
                       {coin.photo ? (
-                        <img
-                          src={coin.photo}
-                          alt={coin.coinName}
-                          className="h-6 w-6 object-contain"
-                        />
+                        <center>
+                          <img
+                            src={coin.photo}
+                            alt={coin.coinName}
+                            className="h-6 w-6 object-contain"
+                          />
+                        </center>
                       ) : (
                         "—"
                       )}

@@ -4,26 +4,27 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { debounce } from "lodash";
 
-interface Plan {
+interface Signal {
   id: number;
-  plan_name: string;
-  status: string;
+  name: string;
+  price: string;
+  strength: string;
 }
 
-export default function PlanList() {
-  const [plans, setPlans] = useState<Plan[]>([]);
+export default function SignalList() {
+  const [signals, setSignals] = useState<Signal[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin_api/plans");
-      if (!res.ok) throw new Error("Failed to fetch plans");
+      const res = await fetch("/api/admin_api/signals");
+      if (!res.ok) throw new Error("Failed to fetch signals");
       const data = await res.json();
-      setPlans(data);
+      setSignals(data);
     } catch (error) {
-      toast.error("Failed to fetch plans.");
+      toast.error("Failed to fetch signals.");
     } finally {
       setLoading(false);
     }
@@ -40,18 +41,16 @@ export default function PlanList() {
   );
 
   const filtered = search
-    ? plans.filter((p) =>
-        p.plan_name.toLowerCase().includes(search.toLowerCase())
-      )
-    : plans;
+    ? signals.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
+    : signals;
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Delete plan?")) return;
+    if (!confirm("Delete signal?")) return;
     await toast.promise(
-      fetch(`/api/admin_api/plans/${id}`, { method: "DELETE" }),
+      fetch(`/api/admin_api/signals/${id}`, { method: "DELETE" }),
       {
         loading: "Deleting...",
-        success: "Deleted plan!",
+        success: "Deleted signal!",
         error: "Delete failed",
       }
     );
@@ -60,17 +59,16 @@ export default function PlanList() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Plans</h1>
+      <h1 className="text-2xl font-bold mb-4">Signals</h1>
       <div className="flex gap-4 mb-4">
         <input
-          placeholder="Search by name..."
+          placeholder="Search..."
           onChange={(e) => handleSearch(e.target.value)}
           className="border p-2 rounded"
-          aria-label="Search plans"
         />
-        <Link href="/admin/plan/new">
+        <Link href="/admin/signal/new">
           <button className="cursor-pointer bg-blue-600 px-4 py-2 text-white rounded">
-            + New Plan
+            + New Signal
           </button>
         </Link>
       </div>
@@ -82,23 +80,25 @@ export default function PlanList() {
           <thead>
             <tr className="text-center bg-gray-300">
               <th>Name</th>
-              <th>Status</th>
+              <th>Price</th>
+              <th>Strength</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((plan) => (
-              <tr key={plan.id} className="hover:bg-gray-50 text-center">
-                <td className="p-2 border">{plan.plan_name}</td>
-                <td className="p-2 border">{plan.status}</td>
+            {filtered.map((signal) => (
+              <tr key={signal.id} className="hover:bg-gray-50 text-center">
+                <td className="p-2 border">{signal.name}</td>
+                <td className="p-2 border">{signal.price}</td>
+                <td className="p-2 border">{signal.strength}</td>
                 <td className="p-2 border space-x-2">
-                  <Link href={`/admin/plan/${plan.id}`}>
+                  <Link href={`/admin/signal/${signal.id}`}>
                     <button className="cursor-pointer text-blue-600">
                       Edit
                     </button>
                   </Link>
                   <button
-                    onClick={() => handleDelete(plan.id)}
+                    onClick={() => handleDelete(signal.id)}
                     className="cursor-pointer text-red-600"
                   >
                     Delete
