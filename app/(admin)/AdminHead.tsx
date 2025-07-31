@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   Coins,
   DollarSign,
+  Folder,
   LogOut,
   Menu,
   Moon,
@@ -14,6 +15,8 @@ import {
   Sun,
   TrendingUp,
   Users,
+  Vault,
+  Waves,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,6 +59,21 @@ const AdminHeadPage: React.FC<AdminHeadPageProps> = ({ children }) => {
       href: "/admin/copytrader",
       icon: <Signal className="h-5 w-5 mr-3" />,
       label: "Copy Trader",
+    },
+    {
+      href: "/admin/plan",
+      icon: <Folder className="h-5 w-5 mr-3" />,
+      label: "Plan Subscription",
+    },
+    {
+      href: "/admin/signal",
+      icon: <Waves className="h-5 w-5 mr-3" />,
+      label: "Signal Trades",
+    },
+    {
+      href: "/admin/stake",
+      icon: <Vault className="h-5 w-5 mr-3" />,
+      label: "Staking",
     },
     {
       href: "/admin/security",

@@ -39,7 +39,7 @@ enum Role {
 }
 
 model TransactionHistory {
-  id        String   @id @default(uuid())
+  id        Int   @id @default(autoincrement())
   title     String
   amount    Float
   status    String
@@ -123,4 +123,40 @@ model CopyTrader {
   createdAt    DateTime @default(now())
 
   @@index([name])
+}
+
+
+model Plan {
+  id                 Int      @id @default(autoincrement())
+  plan_name          String   @db.VarChar(100)
+  plan_des           String   @db.Text
+  min_ins            String   @db.VarChar(100)
+  max_ins            String   @db.VarChar(100)
+  days_duration      String   @db.VarChar(100)
+  daily_interest     String   @db.VarChar(100)
+  status             String   @default("Active") @db.VarChar(10)
+  @@map("plan") // optional, maps to the exact table name in MySQL if it's `plan`
+}
+
+
+model Staking {
+  id        Int    @id @default(autoincrement())
+  name      String @db.VarChar(100)
+  title     String @db.VarChar(100)
+  photo     String @db.VarChar(255)
+  duration  String @db.VarChar(50)
+  roi       String @db.VarChar(50)
+  min       String @db.VarChar(50)
+  max       String @db.VarChar(50)
+
+  @@map("staking") // Optional: maps Prisma model to MySQL table name
+}
+
+model Signal {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(100)
+  price    String @db.VarChar(50)
+  strength String @db.VarChar(50)
+
+  @@map("signals") // Optional: match exact DB table name
 }
