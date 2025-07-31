@@ -15,8 +15,7 @@ export default function EditPlanPage() {
     max_ins: "",
     days_duration: "",
     daily_interest_rate: "",
-    status: "inactive",
-    image: "",
+    status: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -153,16 +152,6 @@ export default function EditPlanPage() {
         <option value="active">Active</option>
         <option value="inactive">Inactive</option>
       </select>
-
-      <label>Image URL</label>
-      <input
-        type="url"
-        name="image"
-        value={form.image}
-        onChange={handleChange}
-        className="w-full border p-2 rounded"
-        placeholder="https://example.com/image.jpg"
-      />
 
       <button
         type="submit"

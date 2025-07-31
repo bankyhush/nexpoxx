@@ -11,7 +11,6 @@ const planSchema = z.object({
   days_duration: z.string(),
   daily_interest: z.string(),
   status: z.string(),
-  image: z.string().optional(),
 });
 
 export async function GET() {

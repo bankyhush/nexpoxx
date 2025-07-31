@@ -11,9 +11,8 @@ export default function NewPlanPage() {
     min_ins: "",
     max_ins: "",
     days_duration: "",
-    daily_interest_rate: "",
-    status: "inactive",
-    image: "",
+    daily_interest: "",
+    status: "Active",
   });
 
   const [loading, setLoading] = useState(false);
@@ -108,8 +107,8 @@ export default function NewPlanPage() {
 
       <label>Daily ROI (max 100)</label>
       <input
-        name="daily_interest_rate"
-        value={form.daily_interest_rate}
+        name="daily_interest"
+        value={form.daily_interest}
         onChange={handleChange}
         maxLength={100}
         required
@@ -129,15 +128,6 @@ export default function NewPlanPage() {
         <option value="inactive">Inactive</option>
         <option value="active">Active</option>
       </select>
-
-      <label>Image URL (optional)</label>
-      <input
-        name="image"
-        value={form.image}
-        onChange={handleChange}
-        maxLength={255}
-        className="w-full border p-2 rounded"
-      />
 
       <button
         type="submit"

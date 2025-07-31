@@ -12,10 +12,19 @@ interface Plan {
 export default function PlanList() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true); // <-- added loading state
 
   const load = async () => {
-    const res = await fetch("/api/admin_api/plans");
-    setPlans(await res.json());
+    setLoading(true); // <-- start loading
+    try {
+      const res = await fetch("/api/admin_api/plans");
+      const data = await res.json();
+      setPlans(data);
+    } catch (error) {
+      toast.error("Failed to fetch plans.");
+    } finally {
+      setLoading(false); // <-- end loading
+    }
   };
 
   useEffect(() => {
@@ -57,34 +66,41 @@ export default function PlanList() {
           </button>
         </Link>
       </div>
-      <table className="w-full border">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((plan) => (
-            <tr key={plan.id} className="hover:bg-gray-50">
-              <td className="p-2 border">{plan.plan_name}</td>
-              <td className="p-2 border">{plan.status}</td>
-              <td className="p-2 border space-x-2">
-                <Link href={`/admin/plan/${plan.id}/edit`}>
-                  <button className="text-blue-600">Edit</button>
-                </Link>
-                <button
-                  onClick={() => handleDelete(plan.id)}
-                  className="text-red-600"
-                >
-                  Delete
-                </button>
-              </td>
+
+      {loading ? (
+        <p>Loading...</p> // <-- Show this while loading
+      ) : (
+        <table className="w-full border">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filtered.map((plan) => (
+              <tr key={plan.id} className="hover:bg-gray-50">
+                <td className="p-2 border">{plan.plan_name}</td>
+                <td className="p-2 border">{plan.status}</td>
+                <td className="p-2 border space-x-2">
+                  <Link href={`/admin/plan/${plan.id}`}>
+                    <button className="cursor-pointer text-blue-600">
+                      Edit
+                    </button>
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(plan.id)}
+                    className="cursor-pointer text-red-600"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
