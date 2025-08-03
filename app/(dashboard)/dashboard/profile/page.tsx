@@ -1,79 +1,106 @@
-import React from 'react';
-import { Camera, Check } from 'lucide-react';
+"use client";
 
-const ProfileDashboard = () => {
-  const profileData = {
-    nickname: "ban***@gmail.com",
-    userId: "552530027221811262",
-    email: "ban***@gmail.com",
-    phone: "****624",
-    identityVerification: "Verified",
-    country: "Nigeria",
-    tradingTier: "Level 1",
-    linkedAccounts: "--"
-  };
+import React from "react";
+import { Check } from "lucide-react";
+import { useUser } from "@/hooks/useUser";
+import BubbleLoader from "@/components/loaders/BubbleLoader";
+import Link from "next/link";
 
-  const InfoRow = ({ label, value, action }: { label: string; value: React.ReactNode; action?: string }) => (
-    <div className="flex items-center justify-between py-6 border-b border-gray-100">
-      <span className="text-gray-900 font-medium">{label}</span>
-      <div className="flex items-center gap-4">
-        <span className="text-gray-600">{value}</span>
-        {action && (
-          <button className="px-4 py-1.5 rounded-full border border-gray-300 text-sm hover:border-gray-400 transition-colors">
-            {action}
-          </button>
-        )}
-      </div>
+const InfoRow = ({
+  label,
+  value,
+  action,
+}: {
+  label: string;
+  value: React.ReactNode;
+  action?: string;
+}) => (
+  <div className="flex justify-between items-center py-4 border-b border-gray-200 last:border-b-0">
+    <span className="text-sm font-medium text-gray-800">{label}</span>
+    <div className="flex items-center gap-4">
+      <span className="text-sm text-gray-600">{value}</span>
+      {action && (
+        <button className="text-sm text-gray-500 hover:text-blue-600 transition-colors">
+          {action}
+        </button>
+      )}
     </div>
-  );
+  </div>
+);
+
+export default function ProfileDashboard() {
+  const { data: user, isLoading, error } = useUser();
+
+  if (isLoading) return <BubbleLoader />;
+  if (error)
+    return <p className="text-red-500 py-10 text-center">{error.message}</p>;
+  if (!user) return <p className="text-center py-10">User not found</p>;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 text-black">
+    <div className="max-w-4xl mx-auto px-6 py-12 bg-gray-50 min-h-screen">
       {/* Profile Header */}
-      <div className="flex items-start gap-6 mb-12">
+      <div className="flex items-center gap-6 mb-10">
         <div className="relative">
-          <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
-            <div className="w-12 h-12 bg-gray-300 rounded-full" />
+          <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden shadow">
+            {/* Placeholder avatar */}
+            <div className="w-24 h-24 bg-gray-300 rounded-full" />
           </div>
-          <button className="absolute bottom-0 right-0 p-2 bg-white rounded-full border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <Camera size={16} className="text-gray-600" />
-          </button>
+        </div>
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Account Settings
+          </h1>
+          <p className="text-sm text-gray-500">
+            Manage your personal information
+          </p>
         </div>
       </div>
 
       {/* Personal Info Section */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-6">Personal info</h2>
-        <InfoRow label="Nickname" value={profileData.nickname} action="Change" />
-        <InfoRow label="User ID" value={profileData.userId} action="Copy" />
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Personal Info
+        </h2>
+        <InfoRow label="Full Name" value={user.fullName || "Not set"} />
+        <InfoRow label="Wallet Address" value={user.walletAddress} />
       </div>
 
-      {/* Verification Info Section */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-6">Verification info</h2>
-        <InfoRow 
-          label="Identity verification" 
+      {/* Verification Section */}
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Verification
+        </h2>
+        <InfoRow
+          label="Identity Verification"
           value={
             <div className="flex items-center gap-2">
               <Check size={16} className="text-green-500" />
-              <span>{profileData.identityVerification}</span>
+              <span>{user.kycStatus}</span>
             </div>
-          } 
-          action="View details" 
+          }
         />
-        <InfoRow label="Country/Region" value={profileData.country} action="View details" />
+        <InfoRow
+          label="Country/Region"
+          value={user.country || "Not provided"}
+        />
       </div>
 
       {/* Account Details Section */}
-      <div className="bg-white rounded-2xl shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-6">Account details</h2>
-        <InfoRow label="Email" value={profileData.email} action="Change" />
-        <InfoRow label="Phone" value={profileData.phone} action="Change" />
-        <InfoRow label="Linked accounts" value={profileData.linkedAccounts} action="Link now" />
-        <InfoRow label="Trading fee tier" value={profileData.tradingTier} action="View details" />
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-18">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Account Details
+        </h2>
+        <InfoRow label="Email" value={user.email} />
+        <InfoRow label="Phone" value={user.phoneNumber || "Not provided"} />
+        <InfoRow label="Account Type" value={user.accountType} />
+        <InfoRow label="Password" value="••••••••" />
+
+        <Link href="/dashboard/profile/edit">
+          <button className="cursor-pointer float-right mt-10 mb-10 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md shadow-md transition duration-200">
+            Edit Profile
+          </button>
+        </Link>
       </div>
     </div>
   );
-};
-
-export default ProfileDashboard;
+}

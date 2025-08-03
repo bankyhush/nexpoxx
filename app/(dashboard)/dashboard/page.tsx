@@ -1,10 +1,15 @@
 "use client";
 import React, { useState } from "react";
 import { Search, ChevronDown, Bell, Eye, ChevronRight } from "lucide-react";
+import { useUser } from "@/hooks/useUser";
+import BubbleLoader from "@/components/loaders/BubbleLoader";
 
 const DashboardUI = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [hideSmallAssets, setHideSmallAssets] = useState(false);
+
+  const { data: user, isLoading, error } = useUser();
+  if (isLoading) return <BubbleLoader />;
 
   const assets = [
     {
@@ -70,9 +75,7 @@ const DashboardUI = () => {
     { name: "Grow", active: false },
     { name: "Analysis", active: false },
     { name: "Order center", active: false },
-    { name: "Fees", active: false },
     { name: "Account statement", active: false },
-    { name: "PoR reports", active: false },
   ];
 
   return (

@@ -24,7 +24,7 @@ export default async function DashboardLayout({
   return (
     <>
       <DashboardHeader />
-      <main className="pt-20">{children}</main>
+      <main className="pt-20 bg-gray-800/60">{children}</main>
       <DashboardFooter />
     </>
   );

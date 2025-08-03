@@ -2,27 +2,47 @@
 
 "use client";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
-import React from "react";
+import { Menu, X, Bell, Globe, Headphones, Plus } from "lucide-react";
+import React, { useEffect, useRef } from "react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Logo } from "@/components/logo";
-import { Bell, Globe, Headphones, Plus } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import LogoutButton from "./DLogout";
 
 const menuItems = [
-  { name: "Features", href: "#link" },
-  { name: "Solution", href: "#link" },
-  { name: "Pricing", href: "#link" },
-  { name: "About", href: "#link" },
+  { name: "User Center", href: "/dashboard/profile" },
+  { name: "Action", href: "/dashboard/action" },
+  { name: "Currency", href: "/dashboard/currency" },
 ];
 
 export const DashboardHeader = () => {
   const [menuState, setMenuState] = React.useState(false);
   const { data: user, isLoading } = useUser();
+
+  const navRef = useRef<HTMLDivElement>(null);
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuState &&
+        navRef.current &&
+        !navRef.current.contains(event.target as Node)
+      ) {
+        setMenuState(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuState]);
+
   return (
     <header>
       <nav
+        ref={navRef}
         data-state={menuState && "active"}
         className="bg-background/50 fixed z-20 w-full border-b backdrop-blur-3xl"
       >
@@ -30,7 +50,7 @@ export const DashboardHeader = () => {
           <div className="relative flex flex-wrap items-center justify-between gap-3 py-2 lg:gap-0 lg:py-4">
             <div className="flex w-full items-center justify-between gap-12 lg:w-auto">
               <Link
-                href="/"
+                href="/dashboard"
                 aria-label="home"
                 className="flex items-center space-x-2"
               >
@@ -39,7 +59,7 @@ export const DashboardHeader = () => {
 
               <button
                 onClick={() => setMenuState(!menuState)}
-                aria-label={menuState == true ? "Close Menu" : "Open Menu"}
+                aria-label={menuState ? "Close Menu" : "Open Menu"}
                 className="relative z-20 -m-2.5 -mr-4 block cursor-pointer p-2.5 lg:hidden"
               >
                 <Menu className="in-data-[state=active]:rotate-180 in-data-[state=active]:scale-0 in-data-[state=active]:opacity-0 m-auto size-6 duration-200" />
