@@ -26,7 +26,7 @@ export default function DashboardCoins() {
     const fetchAssets = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/dashboard_api/coins");
+        const res = await fetch("/api/dashboard_api/listcoins");
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
           throw new Error(

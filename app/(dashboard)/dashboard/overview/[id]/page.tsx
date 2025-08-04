@@ -1,14 +1,8 @@
 "use client";
 
-import { Eye, Download, Upload, BarChart, Bell, Search } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-
-const transactions = [
-  { id: 1, type: "Deposit", amount: 500, date: "2025-08-01" },
-  { id: 2, type: "Withdraw", amount: 200, date: "2025-07-30" },
-  { id: 3, type: "Convert", amount: 150, date: "2025-07-28" },
-];
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { Download, Upload, BarChart, Bell, Search } from "lucide-react";
 
 interface CoinData {
   id: string;
@@ -18,54 +12,78 @@ interface CoinData {
   holdingsUsd: string;
   spotPrice: string;
   photo: string | null;
+  desc: string;
+  availableUsd: string;
+  staked: string;
 }
 
 const OverviewPage = () => {
-  const searchParams = useSearchParams();
-  const coinId = searchParams.get("coinId");
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState<"history" | "about">("history");
-  const [totalBalance, setTotalBalance] = useState<string>("0.00");
+  const { id: coinId } = useParams();
   const [coinData, setCoinData] = useState<CoinData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState<"history" | "about">("history");
 
   useEffect(() => {
-    const fetchData = async () => {
+    if (!coinId) return;
+
+    const fetchCoinData = async () => {
       setLoading(true);
       try {
-        const url = coinId
-          ? `/api/dashboard_api/overview?coinId=${coinId}`
-          : "/api/dashboard_api/total-balance";
-        const res = await fetch(url);
+        const res = await fetch(`/api/dashboard_api/overviews/${coinId}`);
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(
-            errorData.details?.map((d: any) => d.message).join(", ") ||
-              "Failed to load data"
-          );
+          const error = await res.json();
+          throw new Error(error.error || "Failed to load coin data");
         }
-        const data = await res.json();
-        if (coinId && data.id) {
-          setCoinData(data);
-        } else {
-          setTotalBalance(data.totalBalance || "0.00");
-        }
-      } catch (err: any) {
+
+        const { coin, balance } = await res.json();
+
+        const available = Number(balance?.available ?? 0);
+        const onOrder = Number(balance?.onOrder ?? 0);
+        const staked = Number(balance?.staked ?? 0);
+        const total = available + onOrder + staked;
+        const usd = total * Number(coin.coinRate);
+
+        setCoinData({
+          id: coin.id.toString(),
+          name: coin.coinName,
+          fullName: coin.coinTitle,
+          availableUsd: `$${available.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+          staked: `$${staked.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+          holdings: total.toFixed(8),
+          holdingsUsd: usd < 0.01 ? "<$0.01" : `$${usd.toFixed(2)}`,
+          spotPrice: `$${Number(coin.coinRate).toFixed(3)}`,
+          photo: coin.photo || null,
+          desc: coin.desc || "No description available.",
+        });
+      } catch (err) {
         console.error("Fetch error:", err);
-        setTotalBalance("0.00");
         setCoinData(null);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+
+    fetchCoinData();
   }, [coinId]);
+
+  const transactions = [
+    { id: 1, type: "Deposit", amount: 500, date: "2025-08-01" },
+    { id: 2, type: "Withdraw", amount: 200, date: "2025-07-30" },
+    { id: 3, type: "Convert", amount: 150, date: "2025-07-28" },
+  ];
 
   const filteredTransactions = transactions.filter((t) =>
     t.type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // 💡 Use your existing skeleton component here (not repeated for brevity)
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-10 px-4">
@@ -125,118 +143,75 @@ const OverviewPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center space-x-3">
-            {coinData && coinData.photo ? (
-              <img
-                src={coinData.photo}
-                alt={`${coinData.name} logo`}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-            ) : (
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg"
-                style={{ backgroundColor: "#23292F", color: "white" }}
-              >
-                {coinData ? coinData.name.charAt(0) : "O"}
-              </div>
-            )}
-            <div>
-              <h1 className="font-semibold text-xl capitalize">
-                {coinData ? coinData.name : "Overview"}
-              </h1>
-              <p className="text-gray-500 text-sm uppercase">
-                {coinData ? coinData.fullName : "Portfolio Summary"}
-              </p>
+        {/* HEADER */}
+        <div className="mb-8 flex items-center space-x-3">
+          {coinData?.photo ? (
+            <img
+              src={coinData.photo}
+              alt={`${coinData.name} logo`}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-lg">
+              {coinData?.name?.charAt(0) ?? "?"}
             </div>
+          )}
+          <div>
+            <h1 className="text-xl font-semibold">{coinData?.name}</h1>
+            <p className="text-sm text-gray-500 uppercase">
+              {coinData?.fullName}
+            </p>
           </div>
         </div>
 
-        {/* Portfolio Value */}
+        {/* PORTFOLIO VALUE */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-sm text-gray-500">Estimated Total Value</h2>
-            <Eye size={18} className="text-gray-400" />
+            <h2 className="text-sm text-gray-500">Available Value</h2>
           </div>
           <div className="flex items-end space-x-2">
             <h1 className="text-3xl font-bold">
-              {coinData ? coinData.holdingsUsd : totalBalance}
+              {coinData?.availableUsd ?? "$0.00"}
             </h1>
-            <span className="text-sm text-gray-500">USD</span>
           </div>
           <div className="text-sm mt-1">
-            <span className="text-gray-500 mr-1">Today’s P/L:</span>
-            <span className="text-green-600 font-medium">$0.00 (0.00%)</span>
+            <span className="text-orange-500 mr-1">Staked's P/L:</span>
+            <span className="text-orange-600 font-medium">
+              {coinData?.staked}
+            </span>
           </div>
         </div>
 
-        {/* Actions */}
+        {/* ACTIONS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {[
-            { label: "Deposit", icon: Download },
-            { label: "Withdraw", icon: Upload },
-            { label: "Convert", icon: BarChart },
-            { label: "Notifications", icon: Bell },
-          ].map(({ label, icon: Icon }) => (
+          {[Download, Upload, BarChart, Bell].map((Icon, i) => (
             <button
-              key={label}
-              className="flex items-center justify-center bg-white rounded-lg border py-3 text-sm font-medium hover:shadow transition"
+              key={i}
+              className="flex items-center justify-center bg-white rounded-lg border py-3 text-sm font-medium hover:shadow"
             >
               <Icon className="mr-2 text-gray-600" size={18} />
-              {label}
+              {["Deposit", "Withdraw", "Convert", "Notify"][i]}
             </button>
           ))}
         </div>
 
-        {/* Main Grid */}
+        {/* MAIN CONTENT */}
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Assets Summary */}
+          {/* Asset Summary */}
           <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
             <h3 className="text-lg font-semibold mb-4">Asset Summary</h3>
-            <div className="border-t pt-4">
-              {coinData ? (
-                <div>
-                  <div className="flex items-center mb-2">
-                    <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg mr-3"
-                      style={{
-                        backgroundColor: coinData.photo
-                          ? "transparent"
-                          : "#23292F",
-                        color: coinData.photo ? "inherit" : "white",
-                      }}
-                    >
-                      {coinData.photo ? (
-                        <img
-                          src={coinData.photo}
-                          alt={`${coinData.name} logo`}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        coinData.name.charAt(0)
-                      )}
-                    </div>
-                    <div>
-                      <h4 className="font-medium">{coinData.name}</h4>
-                      <p className="text-sm text-gray-500">
-                        {coinData.fullName}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    Holdings: {coinData.holdings} ({coinData.holdingsUsd})
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Spot Price: {coinData.spotPrice}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">
-                  You currently have no holdings.
+            {coinData ? (
+              <div>
+                <p className="text-sm text-gray-600">
+                  Holdings: {coinData.holdings} ({coinData.holdingsUsd})
                 </p>
-              )}
-            </div>
+                <p className="text-sm text-gray-600">
+                  Spot Price: {coinData.spotPrice}
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400">No coin data available.</p>
+            )}
           </div>
 
           {/* Allocation */}
@@ -256,34 +231,27 @@ const OverviewPage = () => {
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* TABS */}
         <div className="mt-10">
           <div className="flex gap-6 border-b pb-2 mb-6">
-            <button
-              className={`text-sm font-medium ${
-                activeTab === "history"
-                  ? "text-indigo-600 border-b-2 border-indigo-600"
-                  : "text-gray-600 hover:text-indigo-600"
-              }`}
-              onClick={() => setActiveTab("history")}
-            >
-              Recent History
-            </button>
-            <button
-              className={`text-sm font-medium ${
-                activeTab === "about"
-                  ? "text-indigo-600 border-b-2 border-indigo-600"
-                  : "text-gray-600 hover:text-indigo-600"
-              }`}
-              onClick={() => setActiveTab("about")}
-            >
-              About Coin
-            </button>
+            {["history", "about"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab as "history" | "about")}
+                className={`text-sm font-medium ${
+                  activeTab === tab
+                    ? "text-indigo-600 border-b-2 border-indigo-600"
+                    : "text-gray-600 hover:text-indigo-600"
+                }`}
+              >
+                {tab === "history" ? "Recent History" : "About Coin"}
+              </button>
+            ))}
           </div>
 
           {activeTab === "history" ? (
             <>
-              {/* Search Bar */}
+              {/* Search */}
               <div className="relative mb-4 max-w-md">
                 <input
                   type="text"
@@ -304,20 +272,11 @@ const OverviewPage = () => {
                   Recent Transactions
                 </h3>
                 {filteredTransactions.length === 0 ? (
-                  <div className="text-center py-10">
-                    <div className="w-14 h-14 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                      <Bell className="text-gray-400" size={24} />
-                    </div>
-                    <h4 className="text-gray-600 font-medium mb-2">
-                      No transactions found
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      Once you make a deposit or trade, transactions will appear
-                      here.
-                    </p>
-                  </div>
+                  <p className="text-sm text-gray-500">
+                    No transactions found.
+                  </p>
                 ) : (
-                  <table className="w-full text-sm text-left">
+                  <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
                         <th className="py-2">Type</th>
@@ -339,41 +298,12 @@ const OverviewPage = () => {
               </div>
             </>
           ) : (
-            // About Coin Tab Content
             <div className="bg-white p-6 rounded-xl shadow-sm">
               <h3 className="text-lg font-semibold mb-4">About Coin</h3>
               {coinData ? (
-                <div>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {coinData.name} ({coinData.fullName}) is a cryptocurrency
-                    operating on its respective blockchain. Launched on an
-                    unspecified date, it serves a unique use case with a market
-                    cap and supply metrics to be detailed.
-                  </p>
-                  <ul className="list-disc list-inside mt-4 text-sm text-gray-700 space-y-2">
-                    <li>Token: {coinData.name}</li>
-                    <li>Spot Price: {coinData.spotPrice}</li>
-                    <li>
-                      Holdings: {coinData.holdings} ({coinData.holdingsUsd})
-                    </li>
-                  </ul>
-                </div>
+                <p className="text-sm text-gray-600">{coinData.desc}</p>
               ) : (
-                <div>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    This section provides general information about the coin or
-                    asset. You can display a coin’s purpose, technology, team,
-                    and market performance here. If this were a real coin
-                    profile, you might include data like:
-                  </p>
-                  <ul className="list-disc list-inside mt-4 text-sm text-gray-700 space-y-2">
-                    <li>Token name and symbol</li>
-                    <li>Blockchain it operates on</li>
-                    <li>Use case or utility</li>
-                    <li>Launch date and founders</li>
-                    <li>Market cap and supply metrics</li>
-                  </ul>
-                </div>
+                <p className="text-sm text-gray-500">Coin data not found.</p>
               )}
             </div>
           )}
