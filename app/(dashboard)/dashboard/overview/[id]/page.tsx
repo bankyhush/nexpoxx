@@ -15,6 +15,7 @@ interface CoinData {
   desc: string;
   availableUsd: string;
   staked: string;
+  onOrder: string;
 }
 
 const OverviewPage = () => {
@@ -42,7 +43,7 @@ const OverviewPage = () => {
         const onOrder = Number(balance?.onOrder ?? 0);
         const staked = Number(balance?.staked ?? 0);
         const total = available + onOrder + staked;
-        const usd = total * Number(coin.coinRate);
+        const usd = total / Number(coin.coinRate);
 
         setCoinData({
           id: coin.id.toString(),
@@ -56,8 +57,12 @@ const OverviewPage = () => {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}`,
-          holdings: total.toFixed(8),
-          holdingsUsd: usd < 0.01 ? "<$0.01" : `$${usd.toFixed(2)}`,
+          onOrder: `$${onOrder.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`,
+          holdings: total.toFixed(2),
+          holdingsUsd: usd < 0.01 ? "<$0.01" : `${usd.toFixed(5)}`,
           spotPrice: `$${Number(coin.coinRate).toFixed(3)}`,
           photo: coin.photo || null,
           desc: coin.desc || "No description available.",
@@ -184,15 +189,37 @@ const OverviewPage = () => {
 
         {/* ACTIONS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {[Download, Upload, BarChart, Bell].map((Icon, i) => (
-            <button
-              key={i}
-              className="flex items-center justify-center bg-white rounded-lg border py-3 text-sm font-medium hover:shadow"
-            >
-              <Icon className="mr-2 text-gray-600" size={18} />
-              {["Deposit", "Withdraw", "Convert", "Notify"][i]}
-            </button>
-          ))}
+          <a
+            href="/deposit"
+            className="cursor-pointer flex items-center justify-center bg-white rounded-lg border py-3 text-sm font-medium hover:shadow"
+          >
+            <Download className="mr-2 text-gray-600" size={18} />
+            Deposit
+          </a>
+
+          <a
+            href="/withdraw"
+            className="cursor-pointer flex items-center justify-center bg-white rounded-lg border py-3 text-sm font-medium hover:shadow"
+          >
+            <Upload className="mr-2 text-gray-600" size={18} />
+            Withdraw
+          </a>
+
+          <a
+            href="/convert"
+            className="cursor-pointer flex items-center justify-center bg-white rounded-lg border py-3 text-sm font-medium hover:shadow"
+          >
+            <BarChart className="mr-2 text-gray-600" size={18} />
+            Convert
+          </a>
+
+          <a
+            href="/notifications"
+            className="cursor-pointer flex items-center justify-center bg-white rounded-lg border py-3 text-sm font-medium hover:shadow"
+          >
+            <Bell className="mr-2 text-gray-600" size={18} />
+            Notify
+          </a>
         </div>
 
         {/* MAIN CONTENT */}
@@ -203,7 +230,8 @@ const OverviewPage = () => {
             {coinData ? (
               <div>
                 <p className="text-sm text-gray-600">
-                  Holdings: {coinData.holdings} ({coinData.holdingsUsd})
+                  Holdings: ${coinData.holdings} ({coinData.holdingsUsd} &nbsp;
+                  {coinData?.name})
                 </p>
                 <p className="text-sm text-gray-600">
                   Spot Price: {coinData.spotPrice}
@@ -218,15 +246,19 @@ const OverviewPage = () => {
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="text-lg font-semibold mb-4">Allocation</h3>
             <div className="h-3 rounded-full bg-gray-200 mb-4 overflow-hidden">
-              <div className="w-[80%] h-full bg-indigo-500"></div>
+              <div className="w-[80%] h-full bg-orange-500"></div>
             </div>
             <div className="flex justify-between text-sm text-gray-700 mb-2">
               <span>Funding</span>
-              <span>80%</span>
+              <span>{coinData?.availableUsd ?? "$0.00"}</span>
+            </div>
+            <div className="flex justify-between text-sm text-gray-700 mb-2">
+              <span>Trading</span>
+              <span>{coinData?.onOrder}</span>
             </div>
             <div className="flex justify-between text-sm text-gray-700">
-              <span>Trading</span>
-              <span>20%</span>
+              <span>Staking</span>
+              <span>{coinData?.staked ?? "$0.00"}</span>
             </div>
           </div>
         </div>
