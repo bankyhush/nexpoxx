@@ -110,11 +110,9 @@ export default function VerificationPage() {
   if (isLoading || !user) return <BubbleLoader />;
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12 min-h-screen bg-gray-50 text-black">
-      <div className="bg-white rounded-xl shadow-md p-8 space-y-8">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Identity Verification
-        </h1>
+    <div className="max-w-3xl mx-auto px-6 py-12 min-h-screen bg-gray-50 text-black dark:bg-background/50">
+      <div className="bg-white rounded-xl shadow-md p-8 space-y-8 dark:bg-gray-900 dark:text-gray-100">
+        <h1 className="text-3xl font-bold ">Identity Verification</h1>
         <p className="text-gray-600">
           Please upload the required documents to verify your identity. Ensure
           all images are clear and legible.

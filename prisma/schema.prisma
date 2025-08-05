@@ -39,7 +39,7 @@ enum Role {
 }
 
 model TransactionHistory {
-  id        Int   @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   title     String
   amount    Float
   status    String
@@ -47,10 +47,14 @@ model TransactionHistory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  coinId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  coin      Coin    @relation(fields: [coinId], references: [id])
 
-  @@index([userId])
+  @@index([userId, coinId])
+ 
 }
+
 
 model Coin {
   id                  Int           @id @default(autoincrement())
@@ -70,6 +74,7 @@ model Coin {
   balances            UserBalance[]
 
   @@index([coinName])
+  TransactionHistory TransactionHistory[]
 }
 
 model Ticket {

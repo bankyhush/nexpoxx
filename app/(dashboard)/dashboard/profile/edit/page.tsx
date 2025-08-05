@@ -111,17 +111,15 @@ export default function EditProfilePage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12 bg-gray-50 text-black min-h-screen">
-      <div className="bg-white shadow-md rounded-lg p-8">
+    <div className="max-w-3xl mx-auto px-6 py-12 bg-gray-50 text-black min-h-screen dark:bg-background/50">
+      <div className="bg-white shadow-md rounded-lg p-8 dark:bg-gray-900 dark:text-white">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">
           Edit Profile
         </h1>
 
         <form onSubmit={onUpdateProfile} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
-            </label>
+            <label className="block text-sm font-medium mb-1">Full Name</label>
             <input
               name="fullName"
               value={form.fullName}
@@ -134,7 +132,7 @@ export default function EditProfilePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium  mb-1">
               Phone Number
             </label>
             <input
@@ -149,9 +147,7 @@ export default function EditProfilePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Country
-            </label>
+            <label className="block text-sm font-medium  mb-1">Country</label>
             <input
               name="country"
               value={form.country}
@@ -179,14 +175,14 @@ export default function EditProfilePage() {
         </form>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg p-8 mt-12">
+      <div className="bg-white shadow-md rounded-lg p-8 mt-12 dark:bg-gray-900 dark:text-white">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2">
           Change Password
         </h2>
 
         <form onSubmit={onChangePassword} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-1">
               Current Password
             </label>
             <input
@@ -202,7 +198,7 @@ export default function EditProfilePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-1">
               New Password
             </label>
             <input
@@ -220,7 +216,7 @@ export default function EditProfilePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium mb-1">
               Confirm New Password
             </label>
             <input

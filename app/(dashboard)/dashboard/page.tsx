@@ -1,12 +1,26 @@
 "use client";
-import { ChevronDown, Bell, ChevronRight } from "lucide-react";
+import { ChevronDown, Bell, ChevronRight, ChevronLeft } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import BubbleLoader from "@/components/loaders/BubbleLoader";
 import DashboardCoins from "./Coins";
 import DashboardBalance from "./Balance";
+import { useEffect, useState } from "react";
+
+interface Transaction {
+  id: number;
+  type: string;
+  amount: number;
+  createdAt: Date;
+  title: string;
+}
 
 const DashboardUI = () => {
   const { data: user, isLoading, error } = useUser();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   if (isLoading) return <BubbleLoader />;
 
   const allocations = [
@@ -30,9 +44,39 @@ const DashboardUI = () => {
     { name: "Account statement", active: false },
   ];
 
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      setLoadingTransactions(true);
+      try {
+        const res = await fetch(
+          `/api/dashboard_api/transactions?page=${currentPage}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch transactions");
+        const data = await res.json();
+        setTransactions(data.transactions);
+        setTotalPages(data.totalPages);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setTransactions([]);
+      } finally {
+        setLoadingTransactions(false);
+      }
+    };
+
+    if (user) fetchTransactions();
+  }, [currentPage, user]);
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
   return (
     <>
-      <div className="flex flex-col min-h-screen ">
+      <div className="flex flex-col min-h-screen">
         {/* Sub Navigation */}
         <div className="border-b border-gray-200 shadow-sm bg-white">
           <div className="container mx-auto px-4">
@@ -119,22 +163,75 @@ const DashboardUI = () => {
                 {/* Transactions Section */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h2 className="text-xl font-semibold mb-6">
-                    Recent transactions
+                    Recent Transactions
                   </h2>
 
-                  <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-                    <div className="mb-4">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                        <Bell size={24} className="text-gray-400" />
-                      </div>
+                  {loadingTransactions ? (
+                    <div className="flex items-center justify-center py-10">
+                      <BubbleLoader />
                     </div>
-                    <h3 className="text-lg font-medium mb-2">
-                      No records found
-                    </h3>
-                    <p className="text-gray-500 text-sm">
-                      Get started with your first transaction
-                    </p>
-                  </div>
+                  ) : transactions.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+                      <div className="mb-4">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                          <Bell size={24} className="text-gray-400" />
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-medium mb-2">
+                        No records found
+                      </h3>
+                      <p className="text-gray-500 text-sm">
+                        Get started with your first transaction
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-gray-900 dark:text-gray-100">
+                          <thead>
+                            <tr className="border-b border-gray-300 dark:border-gray-700">
+                              <th className="py-2 text-left">Type</th>
+                              <th className="py-2 text-left">Amount</th>
+                              <th className="py-2 text-left">Date</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {transactions.map((t) => (
+                              <tr
+                                key={t.id}
+                                className="border-b border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                              >
+                                <td className="py-2">{t.type}</td>
+                                <td className="py-2">${t.amount.toFixed(2)}</td>
+                                <td className="py-2">
+                                  {new Date(t.createdAt).toLocaleDateString()}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="flex justify-between items-center mt-4">
+                        <button
+                          onClick={handlePrevPage}
+                          disabled={currentPage === 1}
+                          className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50 hover:bg-gray-300"
+                        >
+                          <ChevronLeft size={16} />
+                        </button>
+                        <span>
+                          Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                          onClick={handleNextPage}
+                          disabled={currentPage === totalPages}
+                          className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50 hover:bg-gray-300"
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
