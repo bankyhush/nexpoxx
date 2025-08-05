@@ -1,5 +1,5 @@
 "use client";
-import { ChevronDown, Bell, ChevronRight, ChevronLeft } from "lucide-react";
+import { Bell, ChevronRight, ChevronLeft } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import BubbleLoader from "@/components/loaders/BubbleLoader";
 import DashboardCoins from "./Coins";

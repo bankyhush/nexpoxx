@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export default function DashboardBalance() {
@@ -80,19 +81,27 @@ export default function DashboardBalance() {
         </span>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <button className="bg-black text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">
-          Deposit
-        </button>
-        <button className="bg-white text-black border border-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors">
-          Convert
-        </button>
-        <button className="bg-white text-black border border-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors">
-          Withdraw
-        </button>
-        <button className="bg-white text-black border border-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors">
-          Transfer
-        </button>
+      <div className="flex flex-wrap gap-2 dark:bg-gray-900 rounded-lg">
+        <Link href="/dashboard/deposit">
+          <button className="cursor-pointer bg-white text-black border border-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors dark:bg-gray-800 dark:text-white dark:border-gray-800 dark:hover:border-gray-500">
+            Deposit
+          </button>
+        </Link>
+        <Link href="/convert">
+          <button className="cursor-pointer bg-white text-black border border-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors dark:bg-gray-800 dark:text-white dark:border-gray-800 dark:hover:border-gray-500">
+            Convert
+          </button>
+        </Link>
+        <Link href="/withdraw">
+          <button className="cursor-pointer bg-white text-black border border-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors dark:bg-gray-800 dark:text-white dark:border-gray-800 dark:hover:border-gray-500">
+            Withdraw
+          </button>
+        </Link>
+        <Link href="/transfer">
+          <button className="cursor-pointer bg-white text-black border border-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors dark:bg-gray-800 dark:text-white dark:border-gray-800 dark:hover:border-gray-500">
+            Transfer
+          </button>
+        </Link>
       </div>
     </div>
   );
