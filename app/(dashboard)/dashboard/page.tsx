@@ -5,6 +5,7 @@ import BubbleLoader from "@/components/loaders/BubbleLoader";
 import DashboardCoins from "./Coins";
 import DashboardBalance from "./Balance";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface Transaction {
   id: number;
@@ -12,14 +13,46 @@ interface Transaction {
   amount: number;
   createdAt: Date;
   title: string;
+  status: string;
 }
 
 const DashboardUI = () => {
-  const { data: user, isLoading, error } = useUser();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loadingTransactions, setLoadingTransactions] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const { data: user, isLoading, error } = useUser(); // Hook 1: useUser (includes internal context hooks)
+  const [transactions, setTransactions] = useState<Transaction[]>([]); // Hook 2: useState
+  const [loadingTransactions, setLoadingTransactions] = useState(true); // Hook 3: useState
+  const [currentPage, setCurrentPage] = useState(1); // Hook 4: useState
+  const [totalPages, setTotalPages] = useState(1); // Hook 5: useState
+
+  // Hook 6: useEffect for fetching transactions (must be called unconditionally)
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      setLoadingTransactions(true);
+      try {
+        const res = await fetch(
+          `/api/dashboard_api/transactions?page=${currentPage}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch transactions");
+        const data = await res.json();
+        setTransactions(data.transactions);
+        setTotalPages(data.totalPages);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setTransactions([]);
+      } finally {
+        setLoadingTransactions(false);
+      }
+    };
+
+    if (user) fetchTransactions(); // Conditional fetch, but useEffect is still called
+  }, [currentPage, user]); // Dependency on currentPage and user
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
 
   if (isLoading) return <BubbleLoader />;
 
@@ -44,41 +77,11 @@ const DashboardUI = () => {
     { name: "Account statement", active: false },
   ];
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoadingTransactions(true);
-      try {
-        const res = await fetch(
-          `/api/dashboard_api/transactions?page=${currentPage}`
-        );
-        if (!res.ok) throw new Error("Failed to fetch transactions");
-        const data = await res.json();
-        setTransactions(data.transactions);
-        setTotalPages(data.totalPages);
-      } catch (err) {
-        console.error("Fetch error:", err);
-        setTransactions([]);
-      } finally {
-        setLoadingTransactions(false);
-      }
-    };
-
-    if (user) fetchTransactions();
-  }, [currentPage, user]);
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-
   return (
     <>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen mb-14">
         {/* Sub Navigation */}
-        <div className="border-b border-gray-200 shadow-sm bg-white">
+        <div className="border-b border-gray-200 shadow-sm bg-white dark:bg-gray-800 dark:text-red-500">
           <div className="container mx-auto px-4">
             <div className="flex overflow-x-auto hide-scrollbar">
               {tabs.map((tab) => (
@@ -86,8 +89,8 @@ const DashboardUI = () => {
                   key={tab.name}
                   className={`px-6 py-4 whitespace-nowrap cursor-pointer text-sm font-medium transition-colors ${
                     tab.active
-                      ? "text-black border-b-2 border-black"
-                      : "text-gray-500 hover:text-black"
+                      ? "dark:text-red-400 border-b-2 border-black"
+                      : "dark:text-gray-50 hover:text-black"
                   }`}
                 >
                   {tab.name}
@@ -112,10 +115,9 @@ const DashboardUI = () => {
               {/* Right Column */}
               <div className="lg:col-span-1 space-y-6">
                 {/* Allocation Section */}
-                <div className="bg-white rounded-xl shadow-lg">
+                <div className="bg-white rounded-xl shadow-lg dark:bg-gray-900 dark:text-gray-50">
                   <div className="flex items-center justify-between p-6 cursor-pointer">
                     <h2 className="text-xl font-semibold">Allocation</h2>
-                    <ChevronDown size={20} className="text-gray-500" />
                   </div>
 
                   <div className="px-6 pb-6">
@@ -135,7 +137,7 @@ const DashboardUI = () => {
                     {allocations.map((item, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between mb-4 hover:bg-gray-50 p-2 rounded-lg cursor-pointer transition-colors"
+                        className="flex items-center justify-between mb-4 hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded-lg cursor-pointer transition-colors"
                       >
                         <div className="flex items-center">
                           <div
@@ -161,10 +163,18 @@ const DashboardUI = () => {
                 </div>
 
                 {/* Transactions Section */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-6">
-                    Recent Transactions
-                  </h2>
+                <div className="bg-white rounded-xl shadow-lg p-6 text-gray-900 dark:bg-gray-900 dark:text-gray-50">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold">
+                      Recent Transactions
+                    </h2>
+                    <Link
+                      href="/dashboard/transactions"
+                      className="cutext-sm dark:text-red-600 hover:underline font-semibold"
+                    >
+                      View all
+                    </Link>
+                  </div>
 
                   {loadingTransactions ? (
                     <div className="flex items-center justify-center py-10">
@@ -187,11 +197,12 @@ const DashboardUI = () => {
                   ) : (
                     <>
                       <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-gray-900 dark:text-gray-100">
+                        <table className="w-full text-sm ">
                           <thead>
                             <tr className="border-b border-gray-300 dark:border-gray-700">
                               <th className="py-2 text-left">Type</th>
                               <th className="py-2 text-left">Amount</th>
+                              <th className="py-2 text-left">Status</th>
                               <th className="py-2 text-left">Date</th>
                             </tr>
                           </thead>
@@ -202,7 +213,40 @@ const DashboardUI = () => {
                                 className="border-b border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                               >
                                 <td className="py-2">{t.type}</td>
-                                <td className="py-2">${t.amount.toFixed(2)}</td>
+                                <td className="py-2">
+                                  $
+                                  {t.amount.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}
+                                </td>
+                                <td className="py-2">
+                                  {(() => {
+                                    let className = "text-gray-600 bg-gray-100"; // default
+
+                                    if (t.status === "Pending") {
+                                      className =
+                                        "text-yellow-600 bg-yellow-100";
+                                    } else if (t.status === "Submit") {
+                                      className = "text-blue-600 bg-blue-100";
+                                    } else if (t.status === "Approved") {
+                                      className = "text-green-600 bg-green-100";
+                                    } else if (t.status === "Processing") {
+                                      className =
+                                        "text-purple-600 bg-purple-100";
+                                    } else if (t.status === "Cancelled") {
+                                      className = "text-red-600 bg-red-100";
+                                    }
+
+                                    return (
+                                      <span
+                                        className={` px-1 rounded-sm text-sm font-medium ${className}`}
+                                      >
+                                        {t.status}
+                                      </span>
+                                    );
+                                  })()}
+                                </td>
                                 <td className="py-2">
                                   {new Date(t.createdAt).toLocaleDateString()}
                                 </td>

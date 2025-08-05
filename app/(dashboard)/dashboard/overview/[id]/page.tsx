@@ -374,7 +374,13 @@ const OverviewPage = () => {
                             />
                           </td>
                           <td className="py-2">{t.type}</td>
-                          <td className="py-2">${t.amount.toFixed(2)}</td>
+                          <td className="py-2">
+                            $
+                            {t.amount.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
                           <td className="py-2">
                             {new Date(t.createdAt).toLocaleDateString()}
                           </td>

@@ -117,7 +117,7 @@ export default function DashboardCoins() {
   //   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg">
+    <div className="bg-white rounded-xl shadow-lg dark:bg-gray-900 dark:text-gray-50">
       <div className="p-6">
         <h2 className="text-xl font-semibold mb-6">Assets</h2>
 
@@ -132,7 +132,7 @@ export default function DashboardCoins() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search assets"
-              className="w-full sm:w-80 pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+              className="w-full sm:w-80 pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
               aria-label="Search assets"
             />
           </div>
@@ -164,7 +164,7 @@ export default function DashboardCoins() {
         ) : (
           <table className="min-w-full">
             <thead>
-              <tr className="text-sm text-gray-500 border-t border-b border-gray-200">
+              <tr className="text-sm text-gray-500 border-t border-b border-gray-200 dark:border-gray-800">
                 <th className="text-left px-6 py-3 font-medium">Name</th>
                 <th className="text-right px-6 py-3 font-medium">Holdings</th>
                 <th className="text-right px-6 py-3 font-medium">Spot Price</th>
@@ -174,7 +174,7 @@ export default function DashboardCoins() {
               {filteredAssets.map((asset) => (
                 <tr
                   key={asset.id}
-                  className="hover:bg-gray-50 border-b border-gray-100 cursor-pointer"
+                  className="hover:bg-gray-50 border-b border-gray-100 dark:border-gray-800 dark:hover:bg-gray-800 cursor-pointer"
                   onClick={() => router.push(`/dashboard/overview/${asset.id}`)}
                 >
                   <td className="px-6 py-4">

@@ -61,7 +61,7 @@ export default function DashboardBalance() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 transform transition-all hover:shadow-xl">
+    <div className="bg-white rounded-xl shadow-lg p-6 transform transition-all hover:shadow-xl dark:bg-gray-900 dark:text-gray-50">
       <div className="flex items-center mb-2">
         <h2 className="text-sm text-gray-600 mr-2">Estimated total value</h2>
         {/* <Eye size={16} className="text-gray-500" /> */}
