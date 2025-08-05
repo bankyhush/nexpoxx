@@ -82,22 +82,22 @@ export default function DashboardBalance() {
       </div>
 
       <div className="flex flex-wrap gap-2 dark:bg-gray-900 rounded-lg">
-        <Link href="/dashboard/deposit">
+        <Link href="/dashboard/deposit/1">
           <button className="cursor-pointer bg-white text-black border border-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors dark:bg-gray-800 dark:text-white dark:border-gray-800 dark:hover:border-gray-500">
             Deposit
           </button>
         </Link>
-        <Link href="/convert">
+        <Link href="/dashboard/convert">
           <button className="cursor-pointer bg-white text-black border border-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors dark:bg-gray-800 dark:text-white dark:border-gray-800 dark:hover:border-gray-500">
             Convert
           </button>
         </Link>
-        <Link href="/withdraw">
+        <Link href="/dashboard/withdraw/1">
           <button className="cursor-pointer bg-white text-black border border-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors dark:bg-gray-800 dark:text-white dark:border-gray-800 dark:hover:border-gray-500">
             Withdraw
           </button>
         </Link>
-        <Link href="/transfer">
+        <Link href="/dashboard/transfer/1">
           <button className="cursor-pointer bg-white text-black border border-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 transition-colors dark:bg-gray-800 dark:text-white dark:border-gray-800 dark:hover:border-gray-500">
             Transfer
           </button>

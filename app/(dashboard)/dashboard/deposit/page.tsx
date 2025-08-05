@@ -1,4 +1,4 @@
-// app/dashboard/overview/page.tsx
+// app/dashboard/Deposit/page.tsx
 import { redirect } from "next/navigation";
 
 export default function DepositRedirect() {
