@@ -1,12 +1,78 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { useParams, useRouter } from "next/navigation";
+
+interface CoinData {
+  id: string;
+  name: string;
+  fullName: string;
+  wallet: string;
+  photo: string | null;
+  desc: string;
+  cryptoAvail: string;
+}
 
 const WithdrawalPage = () => {
   const [customAddress, setCustomAddress] = useState("");
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
-  const loading = false; // Set to true to test skeleton
+  // const loading = false;
+
+  const { id: coinId } = useParams();
+  const router = useRouter();
+
+  const [coinData, setCoinData] = useState<CoinData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      setIsDark(true);
+      document.documentElement.classList.add("dark");
+    } else {
+      setIsDark(false);
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!coinId) {
+      router.push("/dashboard");
+      return;
+    }
+
+    const fetchCoinData = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/dashboard_api/payout/${coinId}`);
+        if (!res.ok) throw new Error("Failed to fetch");
+
+        const { coin, balance } = await res.json();
+
+        const available = Number(balance?.available ?? 0);
+        const cryptoAvail = available / Number(coin.coinRate);
+
+        setCoinData({
+          id: coin.id.toString(),
+          name: coin.coinName,
+          fullName: coin.coinTitle,
+          wallet: coin.wallet,
+          photo: coin.photo,
+          desc: coin.desc,
+          cryptoAvail: cryptoAvail.toFixed(5),
+        });
+      } catch (err) {
+        console.error("Fetch error:", err);
+        router.push("/dashboard");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCoinData();
+  }, [coinId]);
 
   if (loading) {
     return (
@@ -60,7 +126,9 @@ const WithdrawalPage = () => {
                 Select Cryptocurrency
               </h2>
               <select className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <option value="1">USDT - Tether</option>
+                <option value={coinData?.fullName}>
+                  {coinData?.name} - {coinData?.fullName}
+                </option>
               </select>
             </div>
 
@@ -69,7 +137,14 @@ const WithdrawalPage = () => {
               <h2 className="text-lg font-medium mb-2">Set Destination</h2>
 
               <div className="mb-4 flex space-x-4 border-b border-gray-200">
-                <button className="px-4 py-2 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
+                <button className="flex gap-3 px-4 py-2 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600">
+                  {coinData?.photo && (
+                    <img
+                      src={coinData.photo}
+                      alt={coinData.name}
+                      className="w-6 h-6 rounded-full object-contain"
+                    />
+                  )}
                   On-Chain Withdrawal
                 </button>
               </div>
@@ -79,7 +154,9 @@ const WithdrawalPage = () => {
                   Network
                 </label>
                 <select className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="1">Ethereum</option>
+                  <option value={coinData?.fullName}>
+                    {coinData?.fullName}
+                  </option>
                 </select>
               </div>
 
@@ -115,11 +192,13 @@ const WithdrawalPage = () => {
                 onChange={(e) => setWithdrawalAmount(e.target.value)}
                 className="w-full border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500"
               />
-              <p className="text-sm text-gray-500 mt-2">Available: 0.00 USDT</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Available: {coinData?.cryptoAvail ?? "$0.00"} {coinData?.name}
+              </p>
             </div>
 
             <button
-              className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-400"
+              className="curosr-pointer w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-400"
               disabled={!customAddress || !withdrawalAmount}
               type="button"
             >
