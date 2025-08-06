@@ -198,7 +198,7 @@ const WithdrawalPage = () => {
             </div>
 
             <button
-              className="curosr-pointer w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-400"
+              className="cursor-pointer w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-400"
               disabled={!customAddress || !withdrawalAmount}
               type="button"
             >
@@ -211,12 +211,43 @@ const WithdrawalPage = () => {
             <div className="bg-white rounded-xl shadow-lg p-6 dark:bg-gray-900 dark:text-gray-50">
               <h2 className="text-xl font-bold mb-4">FAQ</h2>
               <ul className="space-y-4 text-sm">
-                <li>How do I make a withdrawal?</li>
-                <li>Why have I still not received my withdrawal?</li>
                 <li>
-                  How do I select the correct network for my crypto withdrawals?
+                  <strong>How do I make a withdrawal?</strong>
+                  <p className="mt-1 text-gray-600 dark:text-gray-400">
+                    To withdraw funds, select the cryptocurrency, enter the
+                    correct network address, specify the amount you want to
+                    withdraw, and click "Withdraw Now." Ensure the destination
+                    address is valid and compatible with the selected network.
+                  </p>
                 </li>
-                <li>Do I need to pay fees for withdrawal?</li>
+                <li>
+                  <strong>Why have I still not received my withdrawal?</strong>
+                  <p className="mt-1 text-gray-600 dark:text-gray-400">
+                    Withdrawals can take a few minutes to several hours
+                    depending on network congestion and internal processing
+                    times. If it has been over 24 hours, please contact support
+                    with your transaction ID.
+                  </p>
+                </li>
+
+                <li>
+                  <strong>
+                    Can I cancel a withdrawal after it's submitted?
+                  </strong>
+                  <p className="mt-1 text-gray-600 dark:text-gray-400">
+                    No, once a withdrawal has been submitted and is being
+                    processed, it cannot be canceled or reversed. Always
+                    double-check the address and amount before confirming.
+                  </p>
+                </li>
+                <li>
+                  <strong>Is there a minimum withdrawal amount?</strong>
+                  <p className="mt-1 text-gray-600 dark:text-gray-400">
+                    Yes, each cryptocurrency has a minimum withdrawal limit to
+                    cover network fees. Attempting to withdraw less than the
+                    minimum will result in an error message.
+                  </p>
+                </li>
               </ul>
             </div>
           </div>
