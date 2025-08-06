@@ -2,14 +2,49 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import BubbleLoader from "@/components/loaders/BubbleLoader";
 
 const WithdrawalPage = () => {
   const [customAddress, setCustomAddress] = useState("");
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
-  const loading = false;
+  const loading = false; // Set to true to test skeleton
 
-  if (loading) return <BubbleLoader />;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 dark:bg-background/50 dark:text-gray-50 mb-14">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="h-10 w-60 rounded-md bg-gray-300 dark:bg-gray-700 animate-pulse" />
+
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Left Skeleton Form */}
+            <div className="flex-1 space-y-6 p-6 rounded-xl shadow-lg dark:bg-gray-900">
+              <div className="h-6 w-40 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="h-12 w-full bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
+
+              <div className="h-6 w-40 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="h-10 w-full bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="h-12 w-full bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
+
+              <div className="h-6 w-40 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="h-12 w-full bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
+
+              <div className="h-12 w-full rounded-lg bg-gray-400 dark:bg-gray-700 animate-pulse" />
+            </div>
+
+            {/* Right Skeleton FAQ */}
+            <div className="w-full lg:w-96 space-y-4">
+              <div className="p-6 rounded-xl shadow-lg dark:bg-gray-900">
+                <div className="h-6 w-32 mb-4 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-4 w-full bg-gray-300 dark:bg-gray-700 rounded animate-pulse mb-2" />
+                <div className="h-4 w-full bg-gray-300 dark:bg-gray-700 rounded animate-pulse mb-2" />
+                <div className="h-4 w-5/6 bg-gray-300 dark:bg-gray-700 rounded animate-pulse mb-2" />
+                <div className="h-4 w-3/4 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 dark:bg-background/50 dark:text-gray-50 mb-14">
@@ -96,7 +131,7 @@ const WithdrawalPage = () => {
           <div className="w-full lg:w-96 space-y-6">
             <div className="bg-white rounded-xl shadow-lg p-6 dark:bg-gray-900 dark:text-gray-50">
               <h2 className="text-xl font-bold mb-4">FAQ</h2>
-              <ul className="space-y-4 text-sm  ">
+              <ul className="space-y-4 text-sm">
                 <li>How do I make a withdrawal?</li>
                 <li>Why have I still not received my withdrawal?</li>
                 <li>
