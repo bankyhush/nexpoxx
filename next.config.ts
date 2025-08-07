@@ -1,20 +1,4 @@
-// import type { NextConfig } from "next";
-
-// const nextConfig: NextConfig = {
-//   /* config options here */
-//   images: {
-//     domains: ["coin-images.coingecko.com"],
-//     remotePatterns: [
-//       {
-//         hostname: "res.cloudinary.com",
-//         protocol: "https",
-//       },
-//     ],
-//   },
-// };
-
-// export default nextConfig;
-
+// next.config.js
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -28,6 +12,16 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "thumbs.dreamstime.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "encrypted-tbn0.gstatic.com",
         pathname: "/**",
       },
     ],

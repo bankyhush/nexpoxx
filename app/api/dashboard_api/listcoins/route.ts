@@ -1,3 +1,5 @@
+//api/dashboard_api/listcoins/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/connections/prisma";
 import { getAuthUser } from "@/lib/getAuthUser";
