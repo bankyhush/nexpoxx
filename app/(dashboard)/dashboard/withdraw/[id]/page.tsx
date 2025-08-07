@@ -70,7 +70,6 @@ const WithdrawalPage = () => {
         setLoading(false);
       }
     };
-
     fetchCoinData();
   }, [coinId]);
 
@@ -125,7 +124,7 @@ const WithdrawalPage = () => {
               <h2 className="text-lg font-medium mb-2">
                 Select Cryptocurrency
               </h2>
-              <select className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <select className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 ">
                 <option value={coinData?.fullName}>
                   {coinData?.name} - {coinData?.fullName}
                 </option>
@@ -153,7 +152,7 @@ const WithdrawalPage = () => {
                 <label className="block text-sm font-medium mb-2">
                   Network
                 </label>
-                <select className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 capitalize">
                   <option value={coinData?.fullName}>
                     {coinData?.fullName}
                   </option>

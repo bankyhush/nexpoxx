@@ -51,6 +51,7 @@ model TransactionHistory {
   amount    Float
   status    String
   type      String
+  info      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    Int
