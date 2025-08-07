@@ -21,8 +21,9 @@ export async function POST(req: NextRequest) {
   const amount = formData.get("amount") as string;
   const userName = formData.get("userName") as string;
   const title = (formData.get("title") as string) || "Deposit";
+  const info = formData.get("info") as string;
 
-  console.log("Received data:", { coinId, amount, title });
+  //console.log("Received data:", { coinId, amount, title });
 
   if (!coinId || !amount) {
     console.log("Validation failed: Missing required fields");
@@ -47,9 +48,10 @@ export async function POST(req: NextRequest) {
         coinId: Number(coinId),
         userId: Number(user.id),
         amount: Number(amount),
-        type: "DEPOSIT",
+        type: "WITHDRAWAL",
         status: "Pending",
         title: title,
+        info: info,
       },
     });
 
@@ -70,12 +72,13 @@ export async function POST(req: NextRequest) {
       const mailOptions = {
         from: EMAIL_USER,
         to: ADMIN_EMAIL,
-        subject: "New Payment Verification Request",
-        text: `A new payment verification has been submitted:\n\n
+        subject: "New Withdrawal Payment Submitted",
+        text: `A new payout payment has been submitted:\n\n
           Transaction ID: ${transaction.id}\n
           User: ${userName}\n
           Amount: ${amount} USD\n
           Title: ${title}\n
+          Info: ${info}
           Status: Pending\n\n
           Please review and update the status accordingly.`,
       };
