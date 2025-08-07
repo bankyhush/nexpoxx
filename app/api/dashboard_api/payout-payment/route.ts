@@ -42,6 +42,28 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Fetch the user's available balance for the coin
+    const balance = await prisma.userBalance.findFirst({
+      where: {
+        userId: Number(user.id),
+        coinId: Number(coinId),
+      },
+      select: {
+        available: true,
+      },
+    });
+
+    const availableBalance = balance?.available ?? 0;
+    const withdrawalAmount = Number(amount);
+
+    if (Number(withdrawalAmount) > Number(availableBalance)) {
+      console.log("Validation failed: Insufficient balance");
+      return NextResponse.json(
+        { error: "Insufficient balance for this operation" },
+        { status: 400 }
+      );
+    }
+
     // Create TransactionHistory record
     const transaction = await prisma.transactionHistory.create({
       data: {
