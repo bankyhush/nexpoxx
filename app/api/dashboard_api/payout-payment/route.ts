@@ -99,8 +99,8 @@ export async function POST(req: NextRequest) {
           Transaction ID: ${transaction.id}\n
           User: ${userName}\n
           Amount: ${amount} USD\n
-          Title: ${title}\n
-          Info: ${info}
+          Coin: ${title}\n
+          Payout Info: ${info}
           Status: Pending\n\n
           Please review and update the status accordingly.`,
       };
