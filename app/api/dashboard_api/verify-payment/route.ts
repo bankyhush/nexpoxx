@@ -68,12 +68,12 @@ export async function POST(req: NextRequest) {
       const mailOptions = {
         from: EMAIL_USER,
         to: ADMIN_EMAIL,
-        subject: "New Payment Verification Request",
+        subject: "New Deposit Verification Request",
         text: `A new payment verification has been submitted:\n\n
           Transaction ID: ${transaction.id}\n
           User: ${userName}\n
           Amount: ${amount} USD\n
-          Title: ${title}\n
+          Coin: ${title}\n
           Status: Pending\n\n
           Please review and update the status accordingly.`,
       };
